@@ -1893,7 +1893,7 @@ setCity(city, true);
   const TAGS = ["想去", "已订", "不想去"];
   const sortEl = document.querySelector("#sort");
   const SK = "mf-notes", HK = "mf-here", FNAME = "mf-notes.json", GK = "mf-gist";
-  const GIST_TOKEN = "";
+  const GIST_ID = "a909ad6dbc92af994df50b35512d1554";
   let db = {}, here = null, locating = false, pushT;
 
   try { db = JSON.parse(localStorage.getItem(SK) || "{}") || {}; } catch { db = {}; }
@@ -2302,7 +2302,7 @@ setCity(city, true);
     const typed = parseCred((document.querySelector("#mf-tok") || {}).value);
     if (typed.token) c.token = typed.token;
     if (typed.id) c.id = typed.id;
-    if (!c.token) c.token = GIST_TOKEN;
+    if (!c.id) c.id = GIST_ID;
     if (!c.token && !c.id) needTok();
     if (c.token && !c.id) {
       const list = await gapi("/gists?per_page=100", c.token);
