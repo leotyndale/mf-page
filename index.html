@@ -2004,7 +2004,7 @@ setCity(city, true);
     Object.keys(obj).forEach(k => {
       if (k === "v" || k === "notes" || k === "ui") return;
       const r = obj[k];
-      if (r && typeof r === "object" && ("done" in r || "note" in r || "tags" in r || "day" in r)) out[k] = r;
+      if (r && typeof r === "object" && ("ts" in r || "done" in r || "note" in r || "tags" in r || "day" in r)) out[k] = r;
     });
     return out;
   }
@@ -2016,7 +2016,8 @@ setCity(city, true);
   function put(c, rec) {
     rec.ts = Date.now();
     const k = key(c);
-    if (!rec.done && !rec.note && !rec.tags.length && !rec.day && !rec.meal) delete db[k];
+    if (!rec.done && !rec.note && !rec.tags.length && !rec.day && !rec.meal)
+      db[k] = { ts: rec.ts, tags: [] };
     else db[k] = rec;
     persist();
     paint(c);
