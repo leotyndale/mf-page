@@ -1691,6 +1691,7 @@ starTabs.forEach(b => b.onclick = () => {
   star = b.dataset.star;
   syncSlot();
   mapTouched = false;
+  litKey = "";
   show();
 });
 q.oninput = apply;
@@ -1952,13 +1953,7 @@ function drawMap() {
     pinIx.set(pinKey(p.name, p.lat), mk);
   });
   requestAnimationFrame(applyLit);
-  if (mapFull) {
-    if (!mapTouched) viewMap();
-  } else if (!litKey) {
-    ignoreMove = true;
-    map.setView(CITIES[city].center, 12);
-    setTimeout(() => { ignoreMove = false; }, 200);
-  }
+  if (!((mapFull && mapTouched) || (!mapFull && litKey))) viewMap();
   setTimeout(() => map.invalidateSize(), 80);
 }
 document.querySelectorAll("#fpoi button").forEach(b => b.onclick = () => {
@@ -3616,7 +3611,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=9", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=10", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
