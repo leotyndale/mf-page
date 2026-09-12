@@ -922,11 +922,11 @@ html[data-star="plan"] #sort { display: none; }
 .pin.lit::after, .poi.lit::after {
   content: ""; position: absolute; inset: -7px; border-radius: 50%;
   border: 2px solid #e8c56a; pointer-events: none;
-  animation: mf-ping .7s ease-out 1;
+  animation: mf-ping 1.1s ease-in-out infinite;
 }
 @keyframes mf-ping {
-  0% { transform: scale(.7); opacity: 1; }
-  100% { transform: scale(2.2); opacity: 0; }
+  0%, 100% { transform: scale(.75); opacity: .25; }
+  50% { transform: scale(1.9); opacity: 1; }
 }
 .sortbar [data-sort="now"] { margin-right: auto; }
 .sortbar [data-sort="price"] { min-width: 2.2em; text-align: right; }
@@ -1695,17 +1695,25 @@ window.addEventListener("hashchange", () => {
 
 const pinIcon = (cls) => L.divIcon({ className: "pin " + cls, iconSize: [16, 16], iconAnchor: [8, 8] });
 const pinIx = new Map();
-let litEl = null;
+let litEl = null, litKey = "";
 function pinKey(name, lat) { return (name || "") + "@" + (+lat).toFixed(5); }
-function pingPin(c) {
-  const mk = c && pinIx.get(pinKey(c.dataset.name, c.dataset.lat));
-  const el = mk && mk.getElement();
-  if (litEl && litEl !== el) litEl.classList.remove("lit");
-  litEl = el || null;
-  if (!el) return;
-  el.classList.remove("lit");
-  void el.offsetWidth;
+function applyLit() {
+  if (litEl) litEl.classList.remove("lit");
+  litEl = null;
+  const mk = pinIx.get(litKey);
+  if (!mk) return;
+  const el = mk.getElement();
+  if (!el) {
+    mk.once("add", applyLit);
+    return;
+  }
   el.classList.add("lit");
+  litEl = el;
+}
+function pingPin(c) {
+  if (!c || !c.dataset.lat) return;
+  litKey = pinKey(c.dataset.name, c.dataset.lat);
+  applyLit();
 }
 window.mfPingPin = pingPin;
 const poiIcon = (kind, label, green) => L.divIcon({
@@ -1882,6 +1890,7 @@ function drawMap() {
     mk.addTo(pins);
     pinIx.set(pinKey(p.name, p.lat), mk);
   });
+  requestAnimationFrame(applyLit);
   if (mapFull) {
     if (!mapTouched) viewMap();
   } else {
@@ -3150,8 +3159,9 @@ main.compact .card.open nav { order: 9; margin-top: 8px; }
     return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= bot;
   }
   mainEl.addEventListener("click", e => {
-    if (!mainEl.classList.contains("compact")) return;
     const card = e.target.closest(".card");
+    if (card && typeof mfPingPin === "function") mfPingPin(card);
+    if (!mainEl.classList.contains("compact")) return;
     if (!card) return;
     if (card.classList.contains("open")) {
       if (e.target.closest(".mwhy")) {
@@ -3170,7 +3180,6 @@ main.compact .card.open nav { order: 9; margin-top: 8px; }
       mainEl.querySelectorAll(".card.open").forEach(closeCard);
       card.classList.add("open");
       dropPress();
-      if (typeof mfPingPin === "function") mfPingPin(card);
     };
     if (card.classList.contains("press")) requestAnimationFrame(open);
     else open();
@@ -3185,8 +3194,10 @@ main.compact .card.open nav { order: 9; margin-top: 8px; }
     return !card.classList.contains("open") || inTitle(card, e);
   }
   mainEl.addEventListener("pointerdown", e => {
+    const card0 = e.target.closest(".card");
+    if (card0 && typeof mfPingPin === "function") mfPingPin(card0);
     if (!mainEl.classList.contains("compact")) return;
-    const card = e.target.closest(".card");
+    const card = card0;
     if (!card || !canPress(card, e)) return;
     dropPress();
     pressEl = card;
