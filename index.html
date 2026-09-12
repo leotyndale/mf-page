@@ -1795,10 +1795,10 @@ function viewMap() {
     });
   }
   ignoreMove = true;
-  const pad = mapFull ? 36 : 16;
-  if (pts.length === 1) map.setView(pts[0], 15);
-  else if (pts.length && pts.length <= 80) map.fitBounds(pts, { padding: [pad, pad], maxZoom: 15 });
-  else map.setView(CITIES[city].center, 12);
+  const pad = mapFull ? 20 : 8;
+  if (!pts.length) map.setView(CITIES[city].center, 12);
+  else if (pts.length === 1) map.setView(pts[0], 13);
+  else map.fitBounds(pts, { padding: [pad, pad], maxZoom: 15 });
   setTimeout(() => { ignoreMove = false; }, 250);
 }
 function setMapFull(on, skipSize) {
@@ -1957,8 +1957,11 @@ function drawMap() {
     pinIx.set(pinKey(p.name, p.lat), mk);
   });
   requestAnimationFrame(applyLit);
-  if (!((mapFull && mapTouched) || (!mapFull && litKey))) viewMap();
-  setTimeout(() => map.invalidateSize(), 80);
+  const keep = (mapFull && mapTouched) || (!mapFull && litKey);
+  setTimeout(() => {
+    map.invalidateSize();
+    if (!keep) viewMap();
+  }, 80);
 }
 document.querySelectorAll("#fpoi button").forEach(b => b.onclick = () => {
   b.classList.toggle("on");
@@ -3615,7 +3618,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=12", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=13", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
