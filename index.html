@@ -917,15 +917,38 @@ html[data-star="plan"] #sort { display: none; }
 .sortbar button.on { color: var(--ink); font-weight: 650; background: none; border: 0; }
 .sortbar button.on[data-dir="asc"]::after { content: " ↑"; }
 .sortbar button.on[data-dir="desc"]::after { content: " ↓"; }
-.leaflet-marker-icon.lit {
-  z-index: 800 !important;
-  overflow: visible !important;
-  filter: drop-shadow(0 0 5px rgba(232,197,106,.7)) drop-shadow(0 0 14px rgba(232,197,106,.3));
-  animation: mf-glow 2.8s ease-in-out infinite;
+.leaflet-div-icon.pin, .leaflet-div-icon.poi {
+  background: none !important; border: 0 !important; box-shadow: none !important;
+  border-radius: 0 !important; overflow: visible !important;
+}
+.pin > i, .poi > i {
+  display: block; width: 100%; height: 100%; box-sizing: border-box;
+  border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+.pin > i, .poi.see > i { border-radius: 50%; }
+.poi.stay > i { border-radius: 4px; }
+.poi.ride > i { border-radius: 4px 4px 4px 0; }
+.pin.s3 > i { background: #3f1018; }
+.pin.s2 > i { background: #8a5a3c; }
+.pin.s1 > i { background: #c4a35a; }
+.pin.sx > i { background: #cbbba8; }
+.pin.sbib > i { background: #3d6b5a; }
+.pin.ssel > i { background: #6b5e52; }
+.pin.splate > i { background: #92400e; }
+.poi.stay > i { background: #0a7869; }
+.poi.ride > i { background: #1a4fc7; }
+.poi.see > i { background: #c2760a; }
+.leaflet-marker-icon.lit { z-index: 800 !important; overflow: visible !important; }
+.leaflet-marker-icon.lit::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,214,110,.85) 0%, rgba(232,197,106,.4) 40%, rgba(232,197,106,0) 72%);
+  pointer-events: none; z-index: -1;
+  animation: mf-glow 2.4s ease-in-out infinite;
 }
 @keyframes mf-glow {
-  0%, 100% { filter: drop-shadow(0 0 3px rgba(232,197,106,.45)) drop-shadow(0 0 8px rgba(232,197,106,.18)); }
-  50% { filter: drop-shadow(0 0 7px rgba(232,197,106,.8)) drop-shadow(0 0 18px rgba(232,197,106,.36)); }
+  0%, 100% { transform: scale(.82); opacity: .55; }
+  50% { transform: scale(1.2); opacity: 1; }
 }
 .sortbar [data-sort="now"] { margin-right: auto; }
 .sortbar [data-sort="price"] { min-width: 2.2em; text-align: right; }
@@ -1692,7 +1715,7 @@ window.addEventListener("hashchange", () => {
   if (CITIES[n] && n !== city) setCity(n, true);
 });
 
-const pinIcon = (cls) => L.divIcon({ className: "pin " + cls, iconSize: [16, 16], iconAnchor: [8, 8] });
+const pinIcon = (cls) => L.divIcon({ className: "pin " + cls, iconSize: [16, 16], iconAnchor: [8, 8], html: "<i></i>" });
 const pinIx = new Map();
 let litEl = null, litKey = "";
 function pinKey(name, lat) { return (name || "") + "@" + (+lat).toFixed(5); }
@@ -1717,7 +1740,7 @@ function pingPin(c) {
 window.mfPingPin = pingPin;
 const poiIcon = (kind, label, green) => L.divIcon({
   className: "poi " + kind, iconSize: [22, 22], iconAnchor: [11, 11],
-  html: kind === "see" && green ? String(green) : label,
+  html: "<i>" + (kind === "see" && green ? String(green) : label) + "</i>",
 });
 const wrap = document.querySelector(".mapwrap");
 const hdr = document.querySelector("header.top");
