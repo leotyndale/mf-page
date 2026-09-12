@@ -1894,6 +1894,7 @@ setCity(city, true);
   const sortEl = document.querySelector("#sort");
   const SK = "mf-notes", HK = "mf-here", FNAME = "mf-notes.json", GK = "mf-gist";
   const GIST_ID = "86fd817d6275569307e519b097f242ec";
+  const GIST_USER = "leotyndale";
   let db = {}, here = null, locating = false, pushT;
 
   try { db = JSON.parse(localStorage.getItem(SK) || "{}") || {}; } catch { db = {}; }
@@ -1968,7 +1969,13 @@ setCity(city, true);
     return cityOf(c) + ":" + (c.dataset.name || "") + "@" + (c.dataset.lat || "");
   }
   function recOf(c) {
-    const r = db[key(c)];
+    const k = key(c);
+    let r = db[k];
+    if (!r) {
+      const prefix = cityOf(c) + ":" + (c.dataset.name || "") + "@";
+      const hit = Object.keys(db).find(x => x.startsWith(prefix));
+      if (hit) r = db[hit];
+    }
     return r
       ? { done: !!r.done, note: r.note || "", tags: normTags(r.tags), ts: r.ts || 0,
           day: r.day || "", meal: r.meal || "" }
@@ -2301,8 +2308,7 @@ setCity(city, true);
     let c = gcfg() || {};
     const typed = parseCred((document.querySelector("#mf-tok") || {}).value);
     if (typed.token) c.token = typed.token;
-    if (typed.id) c.id = typed.id;
-    if (!c.id) c.id = GIST_ID;
+    c.id = GIST_ID;
     if (!c.token && !c.id) needTok();
     if (c.token && !c.id) {
       const list = await gapi("/gists?per_page=100", c.token);
@@ -2323,6 +2329,10 @@ setCity(city, true);
     return c;
   }
   async function cloudGet(c) {
+    try {
+      const r = await fetch("https://gist.githubusercontent.com/" + GIST_USER + "/" + c.id + "/raw/" + FNAME + "?t=" + Date.now());
+      if (r.ok) return JSON.parse(await r.text());
+    } catch {}
     try { return parseGist(await gapi("/gists/" + c.id, c.token)); }
     catch { return parseGist(await jsonpGet(c.id)); }
   }
@@ -2370,7 +2380,9 @@ setCity(city, true);
       const c = await ensureCloud();
       mergePack(await cloudGet(c));
       await cloudPut(c);
-      st(c.token ? "已同步" : "已拉取", true);
+      const n = Object.keys(notesOnly(db)).length;
+      st((c.token ? "已同步 " : "已拉取 ") + n, true);
+      ping((c.token ? "已同步 " : "已拉取 ") + n + " 家");
     } catch (e) {
       const m = (e && e.message) || "";
       st(/not accessible/i.test(m) ? "Token 无 Gist 权限"
@@ -3254,7 +3266,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js");
+  navigator.serviceWorker.register("mf-sw.js?v=4");
 }
 
 </script>
