@@ -1787,13 +1787,17 @@ function syncMapGestures() {
 function viewMap() {
   if (!map) return;
   const pts = [];
-  pane().querySelectorAll(":scope > section:not([hidden]) .card:not(.hide)").forEach(c => {
-    if (c.dataset.lat && c.dataset.park !== "skip") pts.push([+c.dataset.lat, +c.dataset.lng]);
-  });
-  POIS.forEach(p => { if (poiHit(p)) pts.push([p.lat, p.lng]); });
+  if (star === "see") {
+    POIS.forEach(p => { if (poiHit(p)) pts.push([p.lat, p.lng]); });
+  } else {
+    pane().querySelectorAll(":scope > section:not([hidden]) .card:not(.hide)").forEach(c => {
+      if (c.dataset.lat && c.dataset.park !== "skip") pts.push([+c.dataset.lat, +c.dataset.lng]);
+    });
+  }
   ignoreMove = true;
+  const pad = mapFull ? 36 : 16;
   if (pts.length === 1) map.setView(pts[0], 15);
-  else if (pts.length && pts.length <= 80) map.fitBounds(pts, { padding: [36, 36], maxZoom: 15 });
+  else if (pts.length && pts.length <= 80) map.fitBounds(pts, { padding: [pad, pad], maxZoom: 15 });
   else map.setView(CITIES[city].center, 12);
   setTimeout(() => { ignoreMove = false; }, 250);
 }
@@ -3611,7 +3615,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=10", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=11", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
