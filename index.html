@@ -2429,21 +2429,6 @@ setCity(city, true);
     if (!t) return {};
     try { return JSON.parse(t); } catch { return {}; }
   }
-  function jsonpGet(id) {
-    return new Promise((res, rej) => {
-      const cb = "_mfG" + Date.now();
-      const s = document.createElement("script");
-      const done = fn => { delete window[cb]; s.remove(); fn(); };
-      window[cb] = payload => done(() => {
-        if (payload && payload.meta && payload.meta.status && payload.meta.status !== 200)
-          rej(new Error("gist"));
-        else res(payload);
-      });
-      s.onerror = () => done(() => rej(new Error("gist")));
-      s.src = "https://api.github.com/gists/" + id + "?callback=" + cb;
-      document.head.appendChild(s);
-    });
-  }
   function parseCred(raw) {
     const s = (raw || "").trim();
     if (!s) return {};
@@ -2487,8 +2472,8 @@ setCity(city, true);
       const r = await fetch("https://gist.githubusercontent.com/" + GIST_USER + "/" + c.id + "/raw/" + FNAME + "?t=" + Date.now());
       if (r.ok) return JSON.parse(await r.text());
     } catch {}
-    try { return parseGist(await gapi("/gists/" + c.id, c.token)); }
-    catch { return parseGist(await jsonpGet(c.id)); }
+    if (c.token) return parseGist(await gapi("/gists/" + c.id, c.token));
+    throw new Error("拉取失败");
   }
   function cloudPut(c) {
     if (!(c && c.id && c.token)) return Promise.resolve();
@@ -2525,10 +2510,12 @@ setCity(city, true);
     clearTimeout(pushT);
     pushT = setTimeout(() => { cloudPut(c).catch(() => {}); }, 1200);
   }
-  let syncing = false, loggingIn = false;
-  async function sync() {
+  let syncing = false, loggingIn = false, lastSync = 0;
+  async function sync(force) {
     if (syncing || loggingIn) return;
+    if (!force && Date.now() - lastSync < 180000) return;
     syncing = true;
+    lastSync = Date.now();
     st("同步中…");
     try {
       const c = await ensureCloud();
@@ -2539,7 +2526,8 @@ setCity(city, true);
       ping((c.token ? "已同步 " : "已拉取 ") + n + " 家");
     } catch (e) {
       const m = (e && e.message) || "";
-      st(/not accessible/i.test(m) ? "Token 无 Gist 权限"
+      st(/rate limit/i.test(m) ? "GitHub 限额，过一会再试"
+        : /not accessible/i.test(m) ? "Token 无 Gist 权限"
         : /Failed to fetch|NetworkError|network/i.test(m) ? "网络失败"
         : m === "token" ? "填 Token 或 Gist ID"
         : (m.slice(0, 28) || "同步失败"));
@@ -2619,7 +2607,7 @@ setCity(city, true);
         if (gbtn) gbtn.textContent = "同步";
         ping("已登录");
         loggingIn = false;
-        await sync();
+        await sync(true);
         return true;
       }
       st(t.error_description || t.error || "登录失败");
@@ -2632,7 +2620,7 @@ setCity(city, true);
   const gbtn = document.querySelector("#mf-g");
   if (gbtn) {
     gbtn.textContent = (gcfg() && gcfg().token) ? "同步" : "登录";
-    gbtn.onclick = () => { const c = gcfg(); if (c && c.token) sync(); else ghLogin(); };
+    gbtn.onclick = () => { const c = gcfg(); if (c && c.token) sync(true); else ghLogin(); };
     gbtn.addEventListener("contextmenu", e => {
       e.preventDefault();
       localStorage.removeItem(GK);
@@ -3646,7 +3634,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=17", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=18", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
