@@ -2982,6 +2982,11 @@ html[data-star="want"] main.compact .card:not(.open) .mmeal {
   grid-column: 1 / -1; grid-row: 2; margin: 0; width: max-content;
 }
 main.compact .card.open { cursor: default; }
+main.compact .card.open header,
+main.compact .card.open .loc,
+main.compact .card.open .mdist,
+main.compact .card.open .mage,
+main.compact .card.open .mgo { cursor: pointer; }
 main.compact .card.open > * { min-width: 0; }
 main.compact .card.open header { order: 1; }
 main.compact .card.open .loc { order: 2; }
@@ -3128,13 +3133,14 @@ main.compact .card.open nav { order: 10; margin-top: 8px; }
   if (typeof _apply === "function") window.apply = function () { _apply(); stampMeta(); };
 
   function inTitle(card, e) {
-    if (e.target.closest("header, .loc, .mdist, .mage, .mgo")) return true;
-    if (e.target !== card) return false;
-    const box = [card.querySelector("header"), card.querySelector(".loc")].filter(Boolean);
-    if (!box.length) return false;
-    const top = Math.min(...box.map(el => el.getBoundingClientRect().top));
-    const bot = Math.max(...box.map(el => el.getBoundingClientRect().bottom));
-    return e.clientY >= top && e.clientY <= bot;
+    if (e.target.closest("button, .mine, .kv, nav, .mdet, .mwhy, .mmemo")) return false;
+    const head = card.querySelector(":scope > header");
+    const loc = card.querySelector(":scope > .loc");
+    const botEl = loc || head;
+    if (!botEl) return false;
+    const r = card.getBoundingClientRect();
+    const bot = botEl.getBoundingClientRect().bottom;
+    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= bot;
   }
   mainEl.addEventListener("click", e => {
     if (!mainEl.classList.contains("compact")) return;
