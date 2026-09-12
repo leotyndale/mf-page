@@ -950,6 +950,7 @@ html[data-star="plan"] #sort { display: none; }
       <button type="button" data-star="best">50佳</button>
       <button type="button" data-star="dianping">点评</button>
       <button type="button" data-star="sweet">咖啡烘焙</button>
+      <button type="button" data-star="see">景点</button>
     </div>
     <p class="count"></p>
     <button type="button" class="ftog" id="ftog" aria-label="筛选">☰</button>
@@ -1338,6 +1339,7 @@ function slotHit(c) {
   return c.dataset.meal === slotF;
 }
 function starKeys() {
+  if (star === "see") return [];
   if (boxed() || star === "all" || star === "old" || star === "best" || star === "dianping") return ["3", "2", "1", "bib", "plate", "sel", "old", "sweet", "eat"];
   if (star === "sweet") return ["old", "sweet"];
   if (star === "sel") return ["plate", "sel"];
@@ -1406,6 +1408,12 @@ function ensurePark(p) {
 }
 function apply() {
   document.documentElement.dataset.star = star;
+  if (star === "see") {
+    pane().querySelectorAll(":scope > .parkh").forEach(h => h.classList.add("hide"));
+    saveUi();
+    renderMap();
+    return;
+  }
   const secs = secIds().map(id => document.getElementById(id)).filter(Boolean);
   if (!secs.length) return;
   const t = q.value.trim().toLowerCase();
@@ -3145,49 +3153,203 @@ main.compact .card.open nav { order: 9; margin-top: 8px; }
 </script>
 <script>
 (() => {
-  const sort = document.querySelector("#sort");
-  if (!sort) return;
+  const sortEl = document.querySelector("#sort");
+  const countEl = document.querySelector(".count");
+  if (!sortEl) return;
   const css = document.createElement("style");
   css.textContent = `
 #sees.hide, html[data-star="plan"] #sees { display: none; }
-#sees h2 { margin: 8px 10px 2px; font: 650 12px/1.4 inherit; color: var(--muted); letter-spacing: .06em; }
-.sg { flex: none; width: 18px; height: 18px; border-radius: 50%; background: #c2760a; color: #fff;
-  font: 700 10px/18px -apple-system, "PingFang SC", sans-serif; text-align: center; }
-main.compact .card.see header { grid-column: 1 / -1; }
-main.compact .card.see .mdist, main.compact .card.see .mage,
-main.compact .card.see .mgo, main.compact .card.see::after { display: none !important; }`;
+html[data-star="see"] .citypane > section { display: none; }
+main.compact .card.see header { min-width: 0; }`;
   document.head.appendChild(css);
   let box = document.getElementById("sees");
   if (!box) {
     box = document.createElement("div");
     box.id = "sees";
-    sort.insertAdjacentElement("afterend", box);
+    sortEl.insertAdjacentElement("afterend", box);
   }
-  let sig = "";
+
+  const META = {
+    Louvre: { price: 22, born: 1793, note: "世界第一博物馆" },
+    Versailles: { price: 21, born: 1661, note: "旧制度宫殿地标" },
+    "Tour Eiffel": { price: 35, born: 1889, note: "巴黎符号" },
+    "Musée d'Orsay": { price: 16, born: 1986, note: "印象派殿堂" },
+    "Notre-Dame": { price: 0, born: 1163, note: "法兰西主教堂" },
+    "Sainte-Chapelle": { price: 13, born: 1248, note: "哥特彩窗" },
+    Invalides: { price: 15, born: 1670, note: "拿破仑墓" },
+    "Panthéon": { price: 13, born: 1758, note: "共和国先贤" },
+    "Arc de Triomphe": { price: 16, born: 1806, note: "香榭终点" },
+    Orangerie: { price: 13, born: 1852, note: "睡莲椭圆形厅" },
+    "Opéra Garnier": { price: 15, born: 1875, note: "第二帝国歌剧院" },
+    "Centre Pompidou": { price: 18, born: 1977, note: "现代艺术中心" },
+    "Sacré-Cœur": { price: 0, born: 1875, note: "蒙马特俯瞰" },
+    "Jardin du Luxembourg": { price: 0, born: 1612, note: "左岸公园" },
+    "Place des Vosges": { price: 0, born: 1605, note: "王家广场" },
+    "Musée Rodin": { price: 14, born: 1919, note: "沉思者故园" },
+    "Fourvière": { price: 0, born: 1872, note: "里昂守护岗" },
+    "Vieux Lyon": { price: 0, born: 1500, note: "文艺复兴老城" },
+    "Place Bellecour": { price: 0, born: 1708, note: "欧洲最大广场之一" },
+    "Théâtres romains": { price: 7, born: 0, note: "高卢罗马剧场" },
+    "Musée des Confluences": { price: 12, born: 2014, note: "两河交汇馆" },
+    "Place des Terreaux": { price: 0, born: 1646, note: "市政厅广场" },
+    "Parc de la Tête d'Or": { price: 0, born: 1857, note: "城市大公园" },
+    Traboules: { price: 0, born: 1500, note: "穿楼密巷" },
+    "Grossmünster": { price: 5, cur: "chf", born: 1100, note: "苏黎世地标双塔" },
+    "Fraumünster": { price: 5, cur: "chf", born: 853, note: "夏加尔彩窗" },
+    Kunsthaus: { price: 23, cur: "chf", born: 1910, note: "州立美术馆" },
+    "Bürkliplatz": { price: 0, born: 1880, note: "湖滨码头" },
+    Lindenhof: { price: 0, born: 800, note: "老城制高点" },
+    Landesmuseum: { price: 10, cur: "chf", born: 1898, note: "国家博物馆" },
+    Bahnhofstrasse: { price: 0, born: 1864, note: "银行大道" },
+    "Museum Rietberg": { price: 18, cur: "chf", born: 1952, note: "非西方艺术" },
+  };
+  const FAME = [
+    [/Louvre|Versailles|Tour Eiffel|Notre-Dame/, 96, "世界地标"],
+    [/Orsay|Opéra|Arc de Triomphe|Invalides|Panthéon|Sainte-Chapelle|Fourvière|Grossmünster/, 86, "必看"],
+    [/Pompidou|Sacré|Luxembourg|Rodin|Orangerie|Vieux Lyon|Kunsthaus|Fraumünster/, 74, "很值得"],
+  ];
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const yr = new Date().getFullYear();
+
   function esc(s) {
     return String(s || "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  }
+  function eurOf(m) {
+    if (!m || !m.price) return 0;
+    return m.cur === "chf" ? m.price * 8.3 / 7.8 : m.price;
+  }
+  function feeRaw(m) {
+    if (!m || !m.price) return "免费";
+    return m.cur === "chf" ? "CHF " + m.price : "€" + m.price;
+  }
+  function feeShow(m) {
+    const raw = feeRaw(m);
+    if (raw === "免费") return raw;
+    const cny = (document.getElementById("ccy")?.textContent || "¥") !== "€";
+    const n = eurOf(m);
+    return cny ? "¥" + Math.round(n * 7.8) : raw.replace(" ", "");
+  }
+  function here() {
+    try {
+      const a = JSON.parse(localStorage.getItem("mf-here") || "null");
+      if (Array.isArray(a) && a.length >= 2) return [+a[0], +a[1]];
+    } catch {}
+    return null;
+  }
+  function km(a, b, c, d) {
+    const R = 6371, t = Math.PI / 180;
+    const x = (c - a) * t, y = (d - b) * t;
+    const s = Math.sin(x / 2) ** 2 + Math.cos(a * t) * Math.cos(c * t) * Math.sin(y / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+  }
+  function fameOf(p) {
+    const hit = FAME.find(x => x[0].test(p.name));
+    if (hit) return [hit[1], hit[2]];
+    return [p.green === 3 ? 68 : p.green === 2 ? 56 : 44, "绿皮书"];
+  }
+  function score(p, m) {
+    const g = p.green || 0;
+    const resume = g === 3 ? 90 : g === 2 ? 70 : g === 1 ? 48 : 28;
+    const rWhy = g ? "绿皮书 " + g + "★" : "未录星";
+    const [fame, fWhy] = fameOf(p);
+    const born = m.born || 0;
+    const age = born ? yr - born : 0;
+    const hist = age >= 400 ? 96 : age >= 200 ? 88 : age >= 120 ? 76 : age >= 80 ? 64 : age >= 40 ? 50 : born ? 32 : 24;
+    const hWhy = born ? "始建" + born + " · " + age + "年" : "年代未录";
+    const eur = eurOf(m);
+    const fair = g === 3 ? 18 : g === 2 ? 12 : 8;
+    const value = !eur ? 96 : clamp(Math.round(fair / eur * 62), 16, 94);
+    const vWhy = !eur ? "免费" : (eur <= fair * 0.7 ? "门票便宜" : eur >= fair * 1.5 ? "偏贵" : "价位正常") + " · " + feeRaw(m);
+    let cul = 30;
+    if (age >= 200) cul += 28;
+    else if (age >= 80) cul += 16;
+    if (fame >= 90) cul += 18;
+    else if (fame >= 80) cul += 10;
+    cul = clamp(cul, 0, 100);
+    const cWhy = m.note || "常规游览";
+    const rows = [
+      ["履历", resume, rWhy],
+      ["名声", fame, fWhy],
+      ["历史", hist, hWhy],
+      ["价格", value, vWhy],
+      ["文化", cul, cWhy],
+    ];
+    const total = Math.round(resume * 0.25 + fame * 0.27 + hist * 0.16 + value * 0.18 + cul * 0.14);
+    const verdict = total >= 86 ? "必去" : total >= 74 ? "很值得" : total >= 60 ? "值得" : total >= 46 ? "看情况" : "可过";
+    const weak = rows.slice().sort((a, b) => a[1] - b[1])[0];
+    const strong = rows.slice().sort((a, b) => b[1] - a[1])[0];
+    const blurb = strong[1] >= 80 ? strong[0] + "突出" : weak[1] <= 40 ? weak[0] + "拉分" : "综合均衡";
+    return { total, verdict, blurb, rows, age };
+  }
+  function sortSpec() {
+    const b = sortEl.querySelector(":scope > button.on");
+    const field = (b && b.dataset.sort) || "now";
+    const dir = b && b.dataset.dir === "desc" ? -1 : 1;
+    return { field, dir };
   }
   function paint() {
     const star = document.documentElement.dataset.star || "all";
     const qv = (document.querySelector(".search")?.value || "").trim().toLowerCase();
     const pois = typeof mfSeePois === "function" ? mfSeePois() : [];
-    const list = pois.filter(p => !qv
-      || p.name.toLowerCase().includes(qv)
-      || (p.zh || "").includes(qv)
-      || (p.q || "").toLowerCase().includes(qv));
-    const show = star === "all" && list.length;
+    const loc = here();
+    const { field, dir } = sortSpec();
+    const rows = pois.map(p => {
+      const m = META[p.name] || {};
+      const r = score(p, m);
+      const dist = loc ? km(loc[0], loc[1], p.lat, p.lng) : 999999;
+      return { p, m, r, dist, eur: eurOf(m) };
+    }).filter(x => !qv
+      || x.p.name.toLowerCase().includes(qv)
+      || (x.p.zh || "").includes(qv)
+      || (x.p.q || "").toLowerCase().includes(qv));
+    rows.sort((a, b) => {
+      if (field === "price") return (a.eur - b.eur) * dir || a.p.name.localeCompare(b.p.name);
+      if (field === "go") return (a.r.total - b.r.total) * dir || a.p.name.localeCompare(b.p.name);
+      if (field === "age") {
+        const ya = a.m.born || 0, yb = b.m.born || 0;
+        if (!ya && !yb) return 0;
+        if (!ya) return 1;
+        if (!yb) return -1;
+        return (ya - yb) * dir;
+      }
+      if (field === "dist") return (a.dist - b.dist) * dir;
+      return ((a.p.green || 0) - (b.p.green || 0)) * dir || a.p.name.localeCompare(b.p.name);
+    });
+    const show = star === "see";
     box.classList.toggle("hide", !show);
     if (!show) return;
-    const next = (document.documentElement.dataset.city || "") + "|" + list.map(p => p.name).join(",");
-    if (next === sig) return;
-    sig = next;
-    box.innerHTML = "<h2>景点 " + list.length + "</h2>" + list.map(p => {
-      const g = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((p.zh || "") + " " + p.name);
+    if (countEl) countEl.textContent = rows.length + " 处";
+    const opened = new Set([...box.querySelectorAll(".card.open")].map(c => c.dataset.name));
+    box.innerHTML = rows.map(x => {
+      const { p, m, r, dist } = x;
+      const g = p.green || 0;
+      const gmap = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((p.zh || "") + " " + p.name);
       const web = p.url ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(p.url) + '">官网</a>' : "";
       const zh = p.zh ? '<i class="zh">' + esc(p.zh) + "</i>" : "";
-      return '<article class="card see"><header><b class="sg">' + (p.green || "景") + "</b><h3>"
-        + esc(p.name) + zh + "</h3></header>"
-        + '<nav><a class="btn" target="_blank" rel="noopener" href="' + g + '">谷歌地图</a>' + web + "</nav></article>";
+      const star = g
+        ? '<div class="starbox"><span class="now">绿皮 ' + g + "★</span></div>"
+        : '<div class="starbox"><span class="now">景</span></div>';
+      const raw = feeRaw(m);
+      const priceKv = raw === "免费"
+        ? '<div class="kv" data-k="price"><span>门票</span><b>免费</b></div>'
+        : '<div class="kv" data-k="price"><span>门票</span><b data-morig="' + raw + '">' + esc(feeShow(m)) + "</b></div>";
+      const bornKv = m.born
+        ? '<div class="kv" data-k="born"><span>始建</span><b>' + m.born + " · " + r.age + "年</b></div>"
+        : "";
+      const why = '<div class="mwhy"><p class="msum"><em>' + r.verdict + " " + r.total + "</em> · " + r.blurb + "</p>"
+        + r.rows.map(row => '<div class="mline"><i>' + row[0] + "</i><b>" + row[1] + "</b><span>" + row[2] + "</span>"
+          + '<div class="mbar"><i style="width:' + row[1] + '%"></i></div></div>').join("") + "</div>";
+      const dlab = loc && dist < 900000
+        ? (dist < 1 ? Math.round(dist * 1000) + " m" : dist < 10 ? dist.toFixed(1) + " km" : dist < 80 ? Math.round(dist) + " km" : "—")
+        : "—";
+      return '<article class="card see' + (opened.has(p.name) ? " open" : "") + '" data-now="' + (g || "0")
+        + '" data-name="' + esc(p.name) + '" data-price="' + x.eur + '" data-p="' + esc(feeShow(m))
+        + '" data-born="' + (m.born || "") + '" data-go="' + r.total
+        + '" data-lat="' + p.lat + '" data-lng="' + p.lng + '" data-dist="' + dist + '">'
+        + "<header>" + star + "<h3>" + esc(p.name) + zh + "</h3></header>"
+        + '<em class="mdist">' + dlab + '</em><em class="mage">' + (r.age || "—") + '</em><em class="mgo">' + r.total + "</em>"
+        + priceKv + bornKv + why
+        + '<nav><a class="btn" target="_blank" rel="noopener" href="' + gmap + '">谷歌地图</a>' + web + "</nav></article>";
     }).join("");
   }
   const _apply = window.apply;
