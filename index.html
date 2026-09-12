@@ -1810,7 +1810,7 @@ function viewMap() {
   if (!map) return;
   const pts = [];
   if (star === "see") {
-    POIS.forEach(p => { if (poiHit(p)) pts.push([p.lat, p.lng]); });
+    POIS.forEach(p => { if (p.kind === "see" && poiHit(p)) pts.push([p.lat, p.lng]); });
   } else {
     pane().querySelectorAll(":scope > section:not([hidden]) .card:not(.hide)").forEach(c => {
       if (c.dataset.lat && c.dataset.park !== "skip") pts.push([+c.dataset.lat, +c.dataset.lng]);
@@ -3646,7 +3646,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=15", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=16", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
