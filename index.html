@@ -3325,7 +3325,8 @@ main.compact .card.see header { min-width: 0; }`;
       const g = p.green || 0;
       const gmap = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((p.zh || "") + " " + p.name);
       const web = p.url ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(p.url) + '">官网</a>' : "";
-      const zh = p.zh ? '<i class="zh">' + esc(p.zh) + "</i>" : "";
+      const title = p.zh || p.name;
+      const sub = p.zh && p.name !== p.zh ? '<i class="zh">' + esc(p.name) + "</i>" : "";
       const star = g
         ? '<div class="starbox"><span class="now">绿皮 ' + g + "★</span></div>"
         : '<div class="starbox"><span class="now">景</span></div>';
@@ -3346,7 +3347,7 @@ main.compact .card.see header { min-width: 0; }`;
         + '" data-name="' + esc(p.name) + '" data-price="' + x.eur + '" data-p="' + esc(feeShow(m))
         + '" data-born="' + (m.born || "") + '" data-go="' + r.total
         + '" data-lat="' + p.lat + '" data-lng="' + p.lng + '" data-dist="' + dist + '">'
-        + "<header>" + star + "<h3>" + esc(p.name) + zh + "</h3></header>"
+        + "<header>" + star + "<h3>" + esc(title) + sub + "</h3></header>"
         + '<em class="mdist">' + dlab + '</em><em class="mage">' + (r.age || "—") + '</em><em class="mgo">' + r.total + "</em>"
         + priceKv + bornKv + why
         + '<nav><a class="btn" target="_blank" rel="noopener" href="' + gmap + '">谷歌地图</a>' + web + "</nav></article>";
