@@ -1166,6 +1166,7 @@ let ccy = "cny";
 const UK = "mf-ui";
 const FX = { eur: 7.8, chf: 8.3 };
 let POIS = CITIES[city].pois;
+window.mfSeePois = () => POIS.filter(p => p.kind === "see");
 const poiOn = { stay: true, ride: false, see: true };
 const DAY = {一:1,二:2,三:3,四:4,五:5,六:6,日:7,天:7};
 const ALL = [1,2,3,4,5,6,7];
@@ -2975,7 +2976,6 @@ main.compact .card:not(.open) .kv,
 main.compact .card:not(.open) nav,
 main.compact .card:not(.open) .mrow,
 main.compact .card:not(.open) .mmemo,
-main.compact .card:not(.open) .mdet,
 main.compact .card:not(.open) .mine { display: none !important; }
 html[data-star="want"] main.compact .card:not(.open) .mine { display: contents !important; }
 html[data-star="want"] main.compact .card:not(.open) .mmeal {
@@ -2993,7 +2993,6 @@ main.compact .card.open .loc { order: 2; }
 main.compact .card.open .mine { order: 4; display: block; margin-top: 6px; padding-top: 0; border-top: 0; }
 main.compact .card.open .kv,
 main.compact .card.open nav,
-main.compact .card.open .mdet,
 main.compact .card.open .mine { grid-column: 1 / -1; }
 main.compact .card.open .kv {
   margin-top: 3px; padding-top: 0; border: 0;
@@ -3009,7 +3008,6 @@ main.compact .card.open .kv[data-k="hotel"] { order: 5; }
 main.compact .card.open .kv[data-k="rec"],
 main.compact .card.open .kv[data-k="bio"] { order: 6; }
 main.compact .card.open .kv[data-k="honor"] { order: 7; }
-main.compact .card.open .mdet { order: 8; }
 main.compact .card.open .kv[data-k="star"],
 main.compact .card.open .kv[data-k="hist"],
 main.compact .card.open .kv[data-k="sel"],
@@ -3019,34 +3017,14 @@ main.compact .card.open .kv[data-k="s1"],
 main.compact .card.open .kv[data-k="s2"],
 main.compact .card.open .kv[data-k="s3"],
 main.compact .card.open .kv[data-k="end"],
-main.compact .card.open .kv[data-k="note"] { order: 9; }
-main.compact .card.open:not(.deep) .kv[data-k="star"],
-main.compact .card.open:not(.deep) .kv[data-k="hist"],
-main.compact .card.open:not(.deep) .kv[data-k="sel"],
-main.compact .card.open:not(.deep) .kv[data-k="bib"],
-main.compact .card.open:not(.deep) .kv[data-k="plate"],
-main.compact .card.open:not(.deep) .kv[data-k="s1"],
-main.compact .card.open:not(.deep) .kv[data-k="s2"],
-main.compact .card.open:not(.deep) .kv[data-k="s3"],
-main.compact .card.open:not(.deep) .kv[data-k="end"],
-main.compact .card.open:not(.deep) .kv[data-k="note"] { display: none !important; }
-main.compact .card.open:not(.deep) .kv[data-k="honor"] b,
-main.compact .card.open:not(.deep) .kv[data-k="rec"] b,
-main.compact .card.open:not(.deep) .kv[data-k="bio"] b {
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
-  overflow: hidden;
-}
+main.compact .card.open .kv[data-k="note"] { order: 8; }
 main.compact .card.open .kv[data-k] > span {
   position: static; width: 2.8em; height: auto; margin: 0; clip: auto;
   overflow: visible; white-space: nowrap; clip-path: none; font-size: 11px;
 }
 main.compact .card.open .kv[data-k]::before { display: none; }
-main.compact .card.open nav { order: 10; margin-top: 8px; }
-.mdet {
-  margin: 6px 0 0; padding: 0; border: 0; background: none;
-  font: inherit; font-size: 12px; font-weight: 650; color: var(--ink);
-  text-align: left; cursor: pointer;
-}`
+main.compact .card.open nav { order: 9; margin-top: 8px; }
+`
   document.head.appendChild(css);
 
   function setCompact(on) {
@@ -3102,14 +3080,12 @@ main.compact .card.open nav { order: 10; margin-top: 8px; }
     el.textContent = lab;
   }
   function closeCard(c) {
-    c.classList.remove("open", "deep");
+    c.classList.remove("open");
     const w = c.querySelector(".mwhy");
     if (w) w.classList.remove("on");
-    const b = c.querySelector(":scope > .mdet");
-    if (b) b.textContent = "更多";
   }
   function stampMeta() {
-    mainEl.querySelectorAll(".card").forEach(c => {
+    mainEl.querySelectorAll(".card:not(.see)").forEach(c => {
       const b = +c.dataset.born;
       const age = b ? String(yr - b) : "—";
       c.dataset.age = b ? age : "";
@@ -3117,23 +3093,13 @@ main.compact .card.open nav { order: 10; margin-top: 8px; }
       meta(c, "mgo", c.dataset.go || "—");
       if (!c.querySelector(":scope > .mdist")) meta(c, "mdist", "—");
       stampBest(c);
-      const deep = c.querySelector('.kv[data-k="hist"], .kv[data-k="star"], .kv[data-k="s1"], .kv[data-k="honor"]');
-      let more = c.querySelector(":scope > .mdet");
-      if (!deep) { if (more) more.remove(); return; }
-      if (!more) {
-        more = document.createElement("button");
-        more.type = "button";
-        more.className = "mdet";
-        c.appendChild(more);
-      }
-      more.textContent = c.classList.contains("deep") ? "收起" : "更多";
     });
   }
   const _apply = window.apply;
   if (typeof _apply === "function") window.apply = function () { _apply(); stampMeta(); };
 
   function inTitle(card, e) {
-    if (e.target.closest("button, .mine, .kv, nav, .mdet, .mwhy, .mmemo")) return false;
+    if (e.target.closest("button, .mine, .kv, nav, .mwhy, .mmemo")) return false;
     const head = card.querySelector(":scope > header");
     const loc = card.querySelector(":scope > .loc");
     const botEl = loc || head;
@@ -3149,12 +3115,6 @@ main.compact .card.open nav { order: 10; margin-top: 8px; }
     if (card.classList.contains("open")) {
       if (e.target.closest(".mwhy")) {
         e.target.closest(".mwhy").classList.toggle("on");
-        return;
-      }
-      if (e.target.closest(".mdet")) {
-        card.classList.toggle("deep");
-        const b = card.querySelector(":scope > .mdet");
-        if (b) b.textContent = card.classList.contains("deep") ? "收起" : "更多";
         return;
       }
       if (!inTitle(card, e)) return;
@@ -3180,6 +3140,59 @@ main.compact .card.open nav { order: 10; margin-top: 8px; }
   };
   mainEl.addEventListener("pointerup", clearPress);
   mainEl.addEventListener("pointercancel", clearPress);
+})();
+
+</script>
+<script>
+(() => {
+  const sort = document.querySelector("#sort");
+  if (!sort) return;
+  const css = document.createElement("style");
+  css.textContent = `
+#sees.hide, html[data-star="plan"] #sees { display: none; }
+#sees h2 { margin: 8px 10px 2px; font: 650 12px/1.4 inherit; color: var(--muted); letter-spacing: .06em; }
+.sg { flex: none; width: 18px; height: 18px; border-radius: 50%; background: #c2760a; color: #fff;
+  font: 700 10px/18px -apple-system, "PingFang SC", sans-serif; text-align: center; }
+main.compact .card.see header { grid-column: 1 / -1; }
+main.compact .card.see .mdist, main.compact .card.see .mage,
+main.compact .card.see .mgo, main.compact .card.see::after { display: none !important; }`;
+  document.head.appendChild(css);
+  let box = document.getElementById("sees");
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "sees";
+    sort.insertAdjacentElement("afterend", box);
+  }
+  let sig = "";
+  function esc(s) {
+    return String(s || "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  }
+  function paint() {
+    const star = document.documentElement.dataset.star || "all";
+    const qv = (document.querySelector(".search")?.value || "").trim().toLowerCase();
+    const pois = typeof mfSeePois === "function" ? mfSeePois() : [];
+    const list = pois.filter(p => !qv
+      || p.name.toLowerCase().includes(qv)
+      || (p.zh || "").includes(qv)
+      || (p.q || "").toLowerCase().includes(qv));
+    const show = star === "all" && list.length;
+    box.classList.toggle("hide", !show);
+    if (!show) return;
+    const next = (document.documentElement.dataset.city || "") + "|" + list.map(p => p.name).join(",");
+    if (next === sig) return;
+    sig = next;
+    box.innerHTML = "<h2>景点 " + list.length + "</h2>" + list.map(p => {
+      const g = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((p.zh || "") + " " + p.name);
+      const web = p.url ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(p.url) + '">官网</a>' : "";
+      const zh = p.zh ? '<i class="zh">' + esc(p.zh) + "</i>" : "";
+      return '<article class="card see"><header><b class="sg">' + (p.green || "景") + "</b><h3>"
+        + esc(p.name) + zh + "</h3></header>"
+        + '<nav><a class="btn" target="_blank" rel="noopener" href="' + g + '">谷歌地图</a>' + web + "</nav></article>";
+    }).join("");
+  }
+  const _apply = window.apply;
+  if (typeof _apply === "function") window.apply = function () { _apply(); paint(); };
+  else paint();
 })();
 
 </script>
