@@ -111,10 +111,24 @@ async function verChanged(cache) {
   }
 }
 
+function refreshIfNew(cache, req) {
+  verChanged(cache).then(async yes => {
+    if (!yes) return;
+    const res = await fetch(req, { cache: "no-cache" });
+    if (!res.ok) return;
+    await putPage(cache, res);
+    const list = await self.clients.matchAll({ type: "window" });
+    list.forEach(c => c.postMessage({ type: "mf-ver" }));
+  }).catch(() => {});
+}
+
 async function page(req) {
   const cache = await caches.open(K);
   const cached = await matchPage(cache);
-  if (cached && !(await verChanged(cache))) return cached;
+  if (cached) {
+    refreshIfNew(cache, req);
+    return cached;
+  }
   try {
     const res = await fetch(req, { cache: "no-cache" });
     if (res.ok) {
@@ -122,7 +136,7 @@ async function page(req) {
       return res;
     }
   } catch {}
-  return cached || Response.error();
+  return Response.error();
 }
 
 async function asset(req) {
