@@ -3616,7 +3616,10 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=8", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=9", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data && e.data.type === "mf-ver") location.reload();
+  });
 }
 
 </script>
