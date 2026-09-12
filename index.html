@@ -899,6 +899,7 @@ body.maplock header.top { z-index: 2100; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+.mapwrap { height: clamp(180px, 46vw, 300px); }
 .citypane.flat { display: flex; flex-direction: column; }
 .citypane.flat > section:not([hidden]),
 .citypane.flat > section:not([hidden]) > .list { display: contents; }
@@ -1904,6 +1905,8 @@ function warmTiles() {
 }
 function initMap() {
   map = L.map("gmap", {
+    zoomSnap: 0,
+    zoomDelta: 0.5,
     scrollWheelZoom: false,
     attributionControl: false,
     dragging: false,
@@ -3643,7 +3646,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=14", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=15", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
