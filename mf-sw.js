@@ -1,6 +1,6 @@
-const K = "mf-6";
+const K = "mf-7";
 const TK = "mf-tiles";
-const TILE_MAX = 200;
+const TILE_MAX = 1500;
 const PAGE_MS = 6 * 3600 * 1000;
 const PRE = ["./index.html", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest"];
 
@@ -48,6 +48,36 @@ function isPage(req, url) {
 function isTile(u) {
   return u.hostname === "tile.openstreetmap.org"
     || (u.hostname.startsWith("mt") && u.hostname.endsWith(".google.com"));
+}
+
+function tileKey(href) {
+  const u = new URL(href);
+  if (u.hostname.startsWith("mt") && u.hostname.endsWith(".google.com")) u.hostname = "mt0.google.com";
+  return u.href;
+}
+
+function osmOf(href) {
+  const u = new URL(href);
+  if (!(u.hostname.startsWith("mt") && u.hostname.endsWith(".google.com"))) return "";
+  const x = u.searchParams.get("x"), y = u.searchParams.get("y"), z = u.searchParams.get("z");
+  return x == null ? "" : "https://tile.openstreetmap.org/" + z + "/" + x + "/" + y + ".png";
+}
+
+async function pullTile(href) {
+  try {
+    const r = await fetch(href, { mode: "cors", credentials: "omit" });
+    if (r.ok) return r;
+  } catch {}
+  try { return await fetch(href, { credentials: "omit" }); } catch { return undefined; }
+}
+
+async function keepTile(cache, href, res) {
+  if (!res || !res.ok || res.type === "opaque") return;
+  await cache.put(href, res.clone());
+  const keys = await cache.keys();
+  if (keys.length > TILE_MAX) {
+    await Promise.all(keys.slice(0, keys.length - TILE_MAX).map(k => cache.delete(k)));
+  }
 }
 
 async function matchPage(cache) {
@@ -112,15 +142,21 @@ async function asset(req) {
 
 async function tile(req) {
   const cache = await caches.open(TK);
-  const hit = await cache.match(req);
+  const key = tileKey(req.url);
+  const osm = osmOf(key);
+  const hit = await cache.match(key) || (osm && await cache.match(osm));
   if (hit) return hit;
-  const res = await fetch(req);
-  if (res.ok || res.type === "opaque") {
-    cache.put(req, res.clone());
-    const keys = await cache.keys();
-    if (keys.length > TILE_MAX) {
-      await Promise.all(keys.slice(0, keys.length - TILE_MAX).map(k => cache.delete(k)));
+  const res = await pullTile(key);
+  if (res && (res.ok || res.type === "opaque")) {
+    await keepTile(cache, key, res);
+    return res;
+  }
+  if (osm) {
+    const o = await cache.match(osm) || await pullTile(osm);
+    if (o && o.ok) {
+      await keepTile(cache, osm, o);
+      return o;
     }
   }
-  return res;
+  return res || Response.error();
 }
