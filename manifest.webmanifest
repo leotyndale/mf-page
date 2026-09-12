@@ -1,0 +1,8 @@
+{
+  "name": "工作笔记",
+  "short_name": "笔记",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3efe8",
+  "theme_color": "#f3efe8"
+}
