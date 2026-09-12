@@ -952,6 +952,8 @@ html[data-star="plan"] #sort { display: none; }
 }
 .sortbar [data-sort="now"] { margin-right: auto; }
 .sortbar [data-sort="price"] { min-width: 2.2em; text-align: right; }
+#freset { margin-top: 12px; width: 100%; background: #fff; color: var(--ink);
+  border: 1px solid var(--line); font-size: 13px; padding: 8px; }
 </style>
 </head>
 <body>
@@ -1062,6 +1064,7 @@ html[data-star="plan"] #sort { display: none; }
       <select id="farr"></select>
       <select id="fcui"></select>
     </div>
+    <button type="button" id="freset">重置</button>
   </div>
 </header>
 <div class="panel-overlay" id="fpanel-overlay"></div>
@@ -1702,6 +1705,22 @@ if (hotelEl) hotelEl.onchange = apply;
 if (arrEl) arrEl.onchange = apply;
 if (cuiEl) cuiEl.onchange = apply;
 bindChips(carteEl, "carte", () => apply());
+const freset = document.querySelector("#freset");
+if (freset) freset.onclick = () => {
+  dayF = mealF = hotelF = slotF = "";
+  buckets = new Set(["active", "lost"]);
+  if (q) q.value = "";
+  if (arrEl) arrEl.value = "";
+  if (cuiEl) cuiEl.value = "";
+  if (hotelEl) hotelEl.value = "";
+  dayBtns.forEach(b => b.classList.toggle("on", !(b.dataset.day || "")));
+  setChip(statEl, "stat", "active,lost");
+  setChip(mealEl, "meal", "");
+  setChip(carteEl, "carte", "");
+  setChip(slotEl, "slot", "");
+  syncBfHint();
+  apply();
+};
 dayBtns.forEach(b => b.onclick = () => {
   dayBtns.forEach(x => x.classList.toggle("on", x === b));
   dayF = b.dataset.day;
