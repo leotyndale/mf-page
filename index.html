@@ -2373,9 +2373,9 @@ setCity(city, true);
     clearTimeout(pushT);
     pushT = setTimeout(() => { cloudPut(c).catch(() => {}); }, 1200);
   }
-  let syncing = false;
+  let syncing = false, loggingIn = false;
   async function sync() {
-    if (syncing) return;
+    if (syncing || loggingIn) return;
     syncing = true;
     st("同步中…");
     try {
@@ -2426,19 +2426,34 @@ setCity(city, true);
       ping("还缺 GitHub OAuth Client ID");
       return;
     }
+    loggingIn = true;
+    if (gbtn) gbtn.textContent = "…";
     st("登录中…");
-    const r = await fetch(GH_PROXY + "/device", {
-      method: "POST",
-      headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ client_id: GH_CLIENT_ID, scope: "gist" }),
-    });
+    let r;
+    try {
+      r = await fetch(GH_PROXY + "/device", {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ client_id: GH_CLIENT_ID, scope: "gist" }),
+        signal: AbortSignal.timeout(20000),
+      });
+    } catch {
+      loggingIn = false;
+      if (gbtn) gbtn.textContent = "登录";
+      st("换票超时，workers.dev 可能被拦");
+      return;
+    }
     const d = await r.json().catch(() => ({}));
-    if (!d.user_code) { st(d.error || "登录失败"); return; }
+    if (!d.user_code) {
+      loggingIn = false;
+      if (gbtn) gbtn.textContent = "登录";
+      st(d.error_description || d.error || "登录失败");
+      return;
+    }
     const code = d.user_code;
-    st("设备码 " + code);
-    ping("设备码 " + code + "，打开 github.com/login/device 输入");
+    if (gbtn) gbtn.textContent = code;
+    st("到 github.com/login/device 填这个码");
     try { await navigator.clipboard.writeText(code); } catch {}
-    window.open(d.verification_uri || "https://github.com/login/device", "_blank");
     const until = Date.now() + (d.expires_in || 900) * 1000;
     const gap = Math.max(5, d.interval || 5) * 1000;
     while (Date.now() < until) {
@@ -2454,15 +2469,20 @@ setCity(city, true);
       }).then(x => x.json()).catch(() => ({}));
       if (t.access_token) {
         gsave({ token: t.access_token, id: GIST_ID });
+        loggingIn = false;
         if (gbtn) gbtn.textContent = "同步";
         ping("已登录");
         return sync();
       }
       if (t.error && t.error !== "authorization_pending" && t.error !== "slow_down") {
+        loggingIn = false;
+        if (gbtn) gbtn.textContent = "登录";
         st(t.error_description || t.error);
         return;
       }
     }
+    loggingIn = false;
+    if (gbtn) gbtn.textContent = "登录";
     st("登录超时");
   }
   const gbtn = document.querySelector("#mf-g");
