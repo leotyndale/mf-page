@@ -917,6 +917,17 @@ html[data-star="plan"] #sort { display: none; }
 .sortbar button.on { color: var(--ink); font-weight: 650; background: none; border: 0; }
 .sortbar button.on[data-dir="asc"]::after { content: " ↑"; }
 .sortbar button.on[data-dir="desc"]::after { content: " ↓"; }
+.leaflet-marker-icon.lit { z-index: 800 !important; }
+.pin.lit, .poi.lit { box-shadow: 0 0 0 2px #fff, 0 0 10px 3px rgba(212,175,55,.8); }
+.pin.lit::after, .poi.lit::after {
+  content: ""; position: absolute; inset: -7px; border-radius: 50%;
+  border: 2px solid #e8c56a; pointer-events: none;
+  animation: mf-ping .7s ease-out 1;
+}
+@keyframes mf-ping {
+  0% { transform: scale(.7); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
 .sortbar [data-sort="now"] { margin-right: auto; }
 .sortbar [data-sort="price"] { min-width: 2.2em; text-align: right; }
 </style>
@@ -1683,6 +1694,20 @@ window.addEventListener("hashchange", () => {
 });
 
 const pinIcon = (cls) => L.divIcon({ className: "pin " + cls, iconSize: [16, 16], iconAnchor: [8, 8] });
+const pinIx = new Map();
+let litEl = null;
+function pinKey(name, lat) { return (name || "") + "@" + (+lat).toFixed(5); }
+function pingPin(c) {
+  const mk = c && pinIx.get(pinKey(c.dataset.name, c.dataset.lat));
+  const el = mk && mk.getElement();
+  if (litEl && litEl !== el) litEl.classList.remove("lit");
+  litEl = el || null;
+  if (!el) return;
+  el.classList.remove("lit");
+  void el.offsetWidth;
+  el.classList.add("lit");
+}
+window.mfPingPin = pingPin;
 const poiIcon = (kind, label, green) => L.divIcon({
   className: "poi " + kind, iconSize: [22, 22], iconAnchor: [11, 11],
   html: kind === "see" && green ? String(green) : label,
@@ -1818,6 +1843,8 @@ function renderMap() {
 function drawMap() {
   if (!map) return;
   pins.clearLayers();
+  pinIx.clear();
+  litEl = null;
   const cards = pane().querySelectorAll(":scope > section:not([hidden]) .card:not(.hide)");
   cards.forEach(c => {
     if (!c.dataset.lat || c.dataset.park === "skip") return;
@@ -1833,6 +1860,7 @@ function drawMap() {
       openSheet(node, latlng);
     });
     mk.addTo(pins);
+    pinIx.set(pinKey(c.dataset.name, c.dataset.lat), mk);
   });
   POIS.forEach(p => {
     if (!poiHit(p)) return;
@@ -1852,6 +1880,7 @@ function drawMap() {
       openSheet(node, [p.lat, p.lng]);
     });
     mk.addTo(pins);
+    pinIx.set(pinKey(p.name, p.lat), mk);
   });
   if (mapFull) {
     if (!mapTouched) viewMap();
@@ -3141,6 +3170,7 @@ main.compact .card.open nav { order: 9; margin-top: 8px; }
       mainEl.querySelectorAll(".card.open").forEach(closeCard);
       card.classList.add("open");
       dropPress();
+      if (typeof mfPingPin === "function") mfPingPin(card);
     };
     if (card.classList.contains("press")) requestAnimationFrame(open);
     else open();
