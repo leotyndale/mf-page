@@ -9,6 +9,7 @@ self.addEventListener("install", e => {
   e.waitUntil((async () => {
     const c = await caches.open(K);
     await Promise.all(PRE.map(u => c.add(u).catch(() => {})));
+    c.put("./mf-checked", new Response(String(Date.now())));
   })());
 });
 
@@ -61,8 +62,10 @@ async function matchPage(cache) {
 
 async function putPage(cache, res) {
   const html = new URL("./index.html", location.href).href;
+  const root = new URL("./", location.href).href;
   await cache.put("./index.html", res.clone());
   await cache.put(html, res.clone());
+  await cache.put(root, res.clone());
 }
 
 async function due(cache) {
