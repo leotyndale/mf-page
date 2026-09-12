@@ -2413,11 +2413,23 @@ setCity(city, true);
       "Content-Type": "application/json"
     };
   }
+  let rateLeft = 5000, rateReset = 0, lastSent = "";
+  function rateBlocked() {
+    return rateLeft < 30 && rateReset * 1000 > Date.now();
+  }
+  function rateHint() {
+    const m = Math.max(1, Math.ceil((rateReset * 1000 - Date.now()) / 60000));
+    return "额度低，约" + m + "分钟后再试";
+  }
   async function gapi(path, token, opt) {
     const r = await fetch("https://api.github.com" + path, {
       ...opt,
       headers: token ? ghdr(token) : { Accept: "application/vnd.github+json" }
     });
+    const left = +r.headers.get("x-ratelimit-remaining");
+    const reset = +r.headers.get("x-ratelimit-reset");
+    if (isFinite(left)) rateLeft = left;
+    if (isFinite(reset)) rateReset = reset;
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error((j && j.message) || "gist");
     return j;
@@ -2476,11 +2488,13 @@ setCity(city, true);
     throw new Error("拉取失败");
   }
   function cloudPut(c) {
-    if (!(c && c.id && c.token)) return Promise.resolve();
+    if (!(c && c.id && c.token) || rateBlocked()) return Promise.resolve();
+    const body = JSON.stringify(pack());
+    if (body === lastSent) return Promise.resolve();
     return gapi("/gists/" + c.id, c.token, {
       method: "PATCH",
-      body: JSON.stringify({ files: { [FNAME]: { content: JSON.stringify(pack()) } } })
-    });
+      body: JSON.stringify({ files: { [FNAME]: { content: body } } })
+    }).then(() => { lastSent = body; });
   }
   function mergeNotes(remoteNotes) {
     const loc = notesOnly(db), rem = notesOnly(remoteNotes);
@@ -2514,6 +2528,7 @@ setCity(city, true);
   async function sync(force) {
     if (syncing || loggingIn) return;
     if (!force && Date.now() - lastSync < 180000) return;
+    if (!force && rateBlocked()) { st(rateHint()); return; }
     syncing = true;
     lastSync = Date.now();
     st("同步中…");
@@ -3634,7 +3649,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=18", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=19", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
