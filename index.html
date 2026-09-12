@@ -939,16 +939,17 @@ html[data-star="plan"] #sort { display: none; }
 .poi.ride > i { background: #1a4fc7; }
 .poi.see > i { background: #c2760a; }
 .leaflet-marker-icon.lit { z-index: 800 !important; overflow: visible !important; }
+.leaflet-marker-icon.lit > i { position: relative; z-index: 1; }
 .leaflet-marker-icon.lit::after {
   content: ""; position: absolute; left: 50%; top: 50%;
-  width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,214,110,.85) 0%, rgba(232,197,106,.4) 40%, rgba(232,197,106,0) 72%);
-  pointer-events: none; z-index: -1;
-  animation: mf-glow 2.4s ease-in-out infinite;
+  width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,220,120,1) 0%, rgba(255,196,80,.55) 38%, rgba(232,197,106,0) 70%);
+  pointer-events: none; z-index: 0;
+  animation: mf-glow 1.6s ease-in-out infinite;
 }
 @keyframes mf-glow {
-  0%, 100% { transform: scale(.82); opacity: .55; }
-  50% { transform: scale(1.2); opacity: 1; }
+  0%, 100% { transform: scale(.55); opacity: .25; }
+  50% { transform: scale(1.35); opacity: 1; }
 }
 .sortbar [data-sort="now"] { margin-right: auto; }
 .sortbar [data-sort="price"] { min-width: 2.2em; text-align: right; }
