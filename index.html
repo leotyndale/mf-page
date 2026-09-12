@@ -1895,6 +1895,8 @@ setCity(city, true);
   const SK = "mf-notes", HK = "mf-here", FNAME = "mf-notes.json", GK = "mf-gist";
   const GIST_ID = "86fd817d6275569307e519b097f242ec";
   const GIST_USER = "leotyndale";
+  const GH_CLIENT_ID = "Ov23liljDnoOXoMclPBx";
+  const GH_PROXY = "https://mf-oauth.eager-airplane.workers.dev";
   let db = {}, here = null, locating = false, pushT;
 
   try { db = JSON.parse(localStorage.getItem(SK) || "{}") || {}; } catch { db = {}; }
@@ -2419,14 +2421,55 @@ setCity(city, true);
     URL.revokeObjectURL(a.href);
     st("已下载", true);
   }
+  async function ghLogin() {
+    if (!GH_CLIENT_ID || !GH_PROXY) {
+      ping("还缺 GitHub OAuth Client ID");
+      return;
+    }
+    st("登录中…");
+    const r = await fetch(GH_PROXY + "/device", {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ client_id: GH_CLIENT_ID, scope: "gist" }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!d.user_code) { st(d.error || "登录失败"); return; }
+    ping("去 GitHub 输入 " + d.user_code);
+    window.open(d.verification_uri || "https://github.com/login/device", "_blank");
+    const until = Date.now() + (d.expires_in || 900) * 1000;
+    const gap = Math.max(5, d.interval || 5) * 1000;
+    while (Date.now() < until) {
+      await new Promise(ok => setTimeout(ok, gap));
+      const t = await fetch(GH_PROXY + "/token", {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: GH_CLIENT_ID,
+          device_code: d.device_code,
+          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+        }),
+      }).then(x => x.json()).catch(() => ({}));
+      if (t.access_token) {
+        gsave({ token: t.access_token, id: GIST_ID });
+        if (gbtn) gbtn.textContent = "同步";
+        ping("已登录");
+        return sync();
+      }
+      if (t.error && t.error !== "authorization_pending" && t.error !== "slow_down") {
+        st(t.error_description || t.error);
+        return;
+      }
+    }
+    st("登录超时");
+  }
   const gbtn = document.querySelector("#mf-g");
   if (gbtn) {
-    gbtn.onclick = sync;
+    gbtn.textContent = (gcfg() && gcfg().token) ? "同步" : "登录";
+    gbtn.onclick = () => { const c = gcfg(); if (c && c.token) sync(); else ghLogin(); };
     gbtn.addEventListener("contextmenu", e => {
       e.preventDefault();
       localStorage.removeItem(GK);
-      const el = document.querySelector("#mf-tok");
-      if (el) { el.value = ""; el.hidden = false; el.focus(); }
+      gbtn.textContent = "登录";
       st("已退出");
     });
   }
