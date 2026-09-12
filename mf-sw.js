@@ -1,7 +1,6 @@
-const K = "mf-7";
+const K = "mf-8";
 const TK = "mf-tiles";
 const TILE_MAX = 1500;
-const PAGE_MS = 6 * 3600 * 1000;
 const PRE = ["./index.html", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest"];
 
 self.addEventListener("install", e => {
@@ -9,7 +8,6 @@ self.addEventListener("install", e => {
   e.waitUntil((async () => {
     const c = await caches.open(K);
     await Promise.all(PRE.map(u => c.add(u).catch(() => {})));
-    c.put("./mf-checked", new Response(String(Date.now())));
   })());
 });
 
@@ -24,7 +22,7 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
-  if (url.pathname.endsWith("mf-sw.js")) {
+  if (url.pathname.endsWith("mf-sw.js") || url.pathname.endsWith("mf-ver.txt")) {
     e.respondWith(fetch(e.request, { cache: "no-store" }));
     return;
   }
@@ -98,37 +96,33 @@ async function putPage(cache, res) {
   await cache.put(root, res.clone());
 }
 
-async function due(cache) {
-  const m = await cache.match("./mf-checked");
-  if (!m) return true;
-  return Date.now() - +(await m.text()) > PAGE_MS;
-}
-
-function mark(cache) {
-  cache.put("./mf-checked", new Response(String(Date.now())));
-}
-
-function stale(cache, req, cached) {
-  const etag = cached && cached.headers.get("etag");
-  const headers = etag ? { "If-None-Match": etag } : {};
-  fetch(req, { headers, cache: "no-cache" }).then(res => {
-    if (res.ok) putPage(cache, res);
-  }).catch(() => {});
+async function verChanged(cache) {
+  try {
+    const r = await fetch("./mf-ver.txt", { cache: "no-store" });
+    if (!r.ok) return false;
+    const remote = (await r.text()).trim();
+    const hit = await cache.match("./mf-ver");
+    const prev = hit ? (await hit.text()).trim() : "";
+    if (remote && remote === prev) return false;
+    if (remote) cache.put("./mf-ver", new Response(remote));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function page(req) {
   const cache = await caches.open(K);
   const cached = await matchPage(cache);
-  if (cached) {
-    if (await due(cache)) {
-      mark(cache);
-      stale(cache, req, cached);
+  if (cached && !(await verChanged(cache))) return cached;
+  try {
+    const res = await fetch(req, { cache: "no-cache" });
+    if (res.ok) {
+      await putPage(cache, res);
+      return res;
     }
-    return cached;
-  }
-  const res = await fetch(req);
-  if (res.ok) await putPage(cache, res);
-  return res;
+  } catch {}
+  return cached || Response.error();
 }
 
 async function asset(req) {
