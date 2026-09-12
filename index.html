@@ -2434,7 +2434,10 @@ setCity(city, true);
     });
     const d = await r.json().catch(() => ({}));
     if (!d.user_code) { st(d.error || "登录失败"); return; }
-    ping("去 GitHub 输入 " + d.user_code);
+    const code = d.user_code;
+    st("设备码 " + code);
+    ping("设备码 " + code + "，打开 github.com/login/device 输入");
+    try { await navigator.clipboard.writeText(code); } catch {}
     window.open(d.verification_uri || "https://github.com/login/device", "_blank");
     const until = Date.now() + (d.expires_in || 900) * 1000;
     const gap = Math.max(5, d.interval || 5) * 1000;
