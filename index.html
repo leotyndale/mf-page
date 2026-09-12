@@ -3284,7 +3284,7 @@ main.compact .card.see header { min-width: 0; }`;
   function sortSpec() {
     const b = sortEl.querySelector(":scope > button.on");
     const field = (b && b.dataset.sort) || "now";
-    const dir = b && b.dataset.dir === "desc" ? -1 : 1;
+    const dir = b ? (b.dataset.dir === "desc" ? -1 : 1) : (field === "now" || field === "go" ? -1 : 1);
     return { field, dir };
   }
   function paint() {
