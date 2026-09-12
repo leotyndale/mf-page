@@ -1840,7 +1840,7 @@ function openSheet(node, latlng) {
 function addTiles() {
   const layers = [
     L.tileLayer("https://mt{s}.google.com/vt/lyrs=m&hl=zh-CN&x={x}&y={y}&z={z}", { subdomains: "0123", maxZoom: 20 }),
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }),
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, crossOrigin: true }),
   ];
   let i = 0, bad = 0;
   function use() {
@@ -1858,6 +1858,20 @@ function addTiles() {
   }
   use();
 }
+function warmTiles() {
+  if (!map) return;
+  const z = Math.round(map.getZoom());
+  if (z < 1 || z > 19) return;
+  const b = map.getPixelBounds(), ts = 256, max = 1 << z;
+  const x0 = Math.floor(b.min.x / ts), x1 = Math.floor(b.max.x / ts);
+  const y0 = Math.floor(b.min.y / ts), y1 = Math.floor(b.max.y / ts);
+  for (let x = x0; x <= x1; x++) {
+    for (let y = y0; y <= y1; y++) {
+      const xx = ((x % max) + max) % max;
+      fetch("https://tile.openstreetmap.org/" + z + "/" + xx + "/" + y + ".png", { mode: "cors", credentials: "omit" }).catch(() => {});
+    }
+  }
+}
 function initMap() {
   map = L.map("gmap", {
     scrollWheelZoom: false,
@@ -1870,6 +1884,8 @@ function initMap() {
   addTiles();
   pins = L.layerGroup().addTo(map);
   map.setView(CITIES[city].center, 12);
+  let warmT;
+  map.on("moveend", () => { clearTimeout(warmT); warmT = setTimeout(warmTiles, 400); });
   map.on("click", () => { if (mapFull) closeSheet(); });
   map.on("movestart", () => { if (!ignoreMove) mapTouched = true; });
   wrap.addEventListener("click", e => {
@@ -3614,7 +3630,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=6", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=7", { updateViaCache: "none", scope: "./" });
 }
 
 </script>
