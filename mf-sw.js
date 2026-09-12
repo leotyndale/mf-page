@@ -149,6 +149,7 @@ async function tile(req) {
   const res = await pullTile(key);
   if (res && (res.ok || res.type === "opaque")) {
     await keepTile(cache, key, res);
+    if (osm) pullTile(osm).then(o => keepTile(cache, osm, o));
     return res;
   }
   if (osm) {
