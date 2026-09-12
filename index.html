@@ -1755,6 +1755,10 @@ function pingPin(c) {
   if (!c || !c.dataset.lat) return;
   litKey = pinKey(c.dataset.name, c.dataset.lat);
   applyLit();
+  if (!map) return;
+  ignoreMove = true;
+  map.setView([+c.dataset.lat, +c.dataset.lng], Math.max(map.getZoom(), mapFull ? 15 : 14));
+  setTimeout(() => { ignoreMove = false; }, 280);
 }
 window.mfPingPin = pingPin;
 const poiIcon = (kind, label, green) => L.divIcon({
@@ -1950,7 +1954,7 @@ function drawMap() {
   requestAnimationFrame(applyLit);
   if (mapFull) {
     if (!mapTouched) viewMap();
-  } else {
+  } else if (!litKey) {
     ignoreMove = true;
     map.setView(CITIES[city].center, 12);
     setTimeout(() => { ignoreMove = false; }, 200);
