@@ -2303,6 +2303,17 @@ setCity(city, true);
       + (see ? "" : '<button type="button" class="mtrig hide" data-menu="meal">时段</button>')
       + '</div><input class="mmemo" type="text" placeholder="备注" enterkeyhint="done">';
   }
+  function stampNote(c, note) {
+    let el = c.querySelector(":scope > .mnote");
+    const t = String(note || "").trim();
+    if (!t) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement("p");
+      el.className = "mnote";
+      c.appendChild(el);
+    }
+    el.textContent = t;
+  }
   function ensureMine(c) {
     let box = c.querySelector(":scope > .mine");
     if (!box) {
@@ -2379,6 +2390,7 @@ setCity(city, true);
     } else if (wEl) wEl.remove();
     const inp = c.querySelector(":scope > .mine .mmemo");
     if (inp && document.activeElement !== inp) inp.value = rec.note;
+    stampNote(c, rec.note);
     let dEl = c.querySelector(".mdist");
     const d = +c.dataset.dist;
     if (here && d > 0 && d < 900000) {
@@ -2544,6 +2556,7 @@ setCity(city, true);
     const rec = recOf(c);
     rec.note = e.target.value.trim();
     put(c, rec);
+    stampNote(c, rec.note);
   });
 
   function gcfg() {
@@ -3384,6 +3397,14 @@ main.compact .card:not(.open) nav,
 main.compact .card:not(.open) .macts,
 main.compact .card:not(.open) .mmemo,
 main.compact .card:not(.open) .mine { display: none !important; }
+main.compact .card:not(.open) > .mnote {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden; grid-column: 1 / -1; grid-row: 2;
+  margin: 1px 0 0; font-size: 11px; font-weight: 400; line-height: 1.3;
+  color: var(--muted);
+}
+main.compact .card.open > .mnote,
+main:not(.compact) .mnote { display: none !important; }
 html[data-star="want"] main.compact .card:not(.open) .mwhen {
   display: inline-block !important; grid-column: 3; grid-row: 1;
   margin: 0; justify-self: end; align-self: center;
@@ -3937,7 +3958,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=63", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=64", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
