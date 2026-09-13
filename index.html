@@ -1470,7 +1470,10 @@ function kvOrig(c, key) {
 }
 function priceKey(c) {
   if (slotF === "breakfast" || mealF === "breakfast" || mealF === "breakfast-open") return firstEur(kvOrig(c, "bfast"));
-  return menuEur(kvOrig(c, "menu") || kvOrig(c, "price"));
+  const n = menuEur(kvOrig(c, "menu") || kvOrig(c, "price"));
+  if (n !== Infinity) return n;
+  const d = +c.dataset.price;
+  return d > 0 ? d : Infinity;
 }
 function stampPrice(c) {
   const n = priceKey(c);
@@ -3934,7 +3937,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=60", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=62", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
