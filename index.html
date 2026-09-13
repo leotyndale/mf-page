@@ -6,8 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f3efe8">
+<meta name="apple-mobile-web-app-title" content="笔记">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-512.png" type="image/png">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>工作笔记</title>
 <style>/* required styles */
@@ -1920,6 +1922,7 @@ function warmTiles() {
   for (let x = x0; x <= x1; x++) {
     for (let y = y0; y <= y1; y++) {
       const xx = ((x % max) + max) % max;
+      fetch("https://mt0.google.com/vt/lyrs=m&hl=zh-CN&x=" + xx + "&y=" + y + "&z=" + z, { credentials: "omit" }).catch(() => {});
       fetch("https://tile.openstreetmap.org/" + z + "/" + xx + "/" + y + ".png", { mode: "cors", credentials: "omit" }).catch(() => {});
     }
   }
@@ -3921,8 +3924,8 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 
 </script>
 <script>
-if (location.protocol === "https:" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("mf-sw.js?v=43", { updateViaCache: "none", scope: "./" });
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
+  navigator.serviceWorker.register("mf-sw.js?v=45", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
