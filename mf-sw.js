@@ -1,7 +1,7 @@
 const K = "mf-8";
 const TK = "mf-tiles";
 const TILE_MAX = 1500;
-const PRE = ["./index.html", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest"];
+const PRE = ["./index.html", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest"];
 
 self.addEventListener("install", e => {
   self.skipWaiting();
@@ -66,12 +66,12 @@ async function pullTile(href) {
     const r = await fetch(href, { mode: "cors", credentials: "omit" });
     if (r.ok) return r;
   } catch {}
-  try { return await fetch(href, { credentials: "omit" }); } catch { return undefined; }
+  try { return await fetch(href, { mode: "no-cors", credentials: "omit" }); } catch { return undefined; }
 }
 
 async function keepTile(cache, href, res) {
-  if (!res || !res.ok || res.type === "opaque") return;
-  await cache.put(href, res.clone());
+  if (!res || (res.type !== "opaque" && !res.ok)) return;
+  try { await cache.put(href, res.clone()); } catch { return; }
   const keys = await cache.keys();
   if (keys.length > TILE_MAX) {
     await Promise.all(keys.slice(0, keys.length - TILE_MAX).map(k => cache.delete(k)));
