@@ -2363,7 +2363,6 @@ setCity(city, true);
     ensureMine(c);
     stampTags(c);
     const rec = recOf(c);
-    const want = rec.tags.includes("想去");
     const MEAL = { breakfast: "早", lunch: "午", dinner: "晚" };
     const mark = c.querySelector(':scope > .mine .mtrig[data-menu="mark"]');
     if (mark) {
@@ -2379,14 +2378,17 @@ setCity(city, true);
       mealB.textContent = MEAL[rec.meal] || "时段";
       mealB.classList.toggle("on", !!rec.meal);
     }
-    let wEl = c.querySelector(":scope > .mwhen");
-    if (want && rec.meal) {
+    let wEl = c.querySelector(".mwhen");
+    const h = c.querySelector(":scope > header");
+    const h3 = h && h.querySelector("h3");
+    if (rec.meal) {
       if (!wEl) {
         wEl = document.createElement("em");
         wEl.className = "mwhen mtrig";
         wEl.dataset.menu = "meal";
-        c.appendChild(wEl);
       }
+      if (h && h3 && wEl.parentElement !== h) h.insertBefore(wEl, h3);
+      else if (!h && !wEl.parentElement) c.appendChild(wEl);
       wEl.textContent = MEAL[rec.meal] || "";
     } else if (wEl) wEl.remove();
     const inp = c.querySelector(":scope > .mine .mmemo");
@@ -3424,14 +3426,7 @@ main.compact .card:not(.open) nav,
 main.compact .card:not(.open) .macts,
 main.compact .card:not(.open) .mmemo,
 main.compact .card:not(.open) .mine { display: none !important; }
-main.compact .card:not(.open) > .mwhen {
-  display: flex !important; align-items: center; justify-content: center;
-  grid-column: 3; grid-row: 1; width: 18px; height: 16px; margin: 0;
-  border-radius: 8px; background: #ead6c0;
-  font-size: 10px; font-weight: 650; font-style: normal; color: var(--gold);
-  cursor: pointer;
-}
-html:not([data-star="want"]) main.compact .card:not(.open) > .mwhen { display: none !important; }
+main.compact .card:not(.open)[data-meal="breakfast"] header > em:not(.mwhen) { display: none !important; }
 main.compact .card:not(.open) > .mnote {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
   overflow: hidden; grid-column: 1 / -1; grid-row: 2;
@@ -3486,15 +3481,14 @@ main.compact .card.open .kv[data-k]::before { display: none; }
 main.compact .card.open nav { order: 9; margin-top: 8px; }
 html[data-star="want"] #sort.sortbar,
 html[data-star="want"] main.compact .card:not(.open) {
-  grid-template-columns: 36px minmax(0,1fr) 18px 48px 56px;
+  grid-template-columns: 36px minmax(0,1fr) 48px 56px;
 }
 html[data-star="want"] .sortbar [data-sort="age"],
 html[data-star="want"] .sortbar [data-sort="go"] { display: none; }
-html[data-star="want"] .sortbar [data-sort="dist"] { grid-column: 4; }
-html[data-star="want"] .sortbar [data-sort="price"] { grid-column: 5; }
-html[data-star="want"] main.compact .card:not(.open) .mdist { grid-column: 4; }
-html[data-star="want"] main.compact .card:not(.open)::after { grid-column: 5; }
-html[data-star="want"] main.compact .card:not(.open) header > em:not(.mwhen) { display: none !important; }
+html[data-star="want"] .sortbar [data-sort="dist"] { grid-column: 3; }
+html[data-star="want"] .sortbar [data-sort="price"] { grid-column: 4; }
+html[data-star="want"] main.compact .card:not(.open) .mdist { grid-column: 3; }
+html[data-star="want"] main.compact .card:not(.open)::after { grid-column: 4; }
 html[data-star="want"] main.compact .card:not(.open) .mage,
 html[data-star="want"] main.compact .card:not(.open) .mgo { display: none !important; }
 main:not(.compact) .mwhen,
@@ -3989,7 +3983,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=81", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=82", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
