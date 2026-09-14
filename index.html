@@ -2701,7 +2701,13 @@ setCity(city, true);
       ping((c.token ? "已同步 " : "已拉取 ") + n + " 家");
     } catch (e) {
       const m = (e && e.message) || "";
-      st(/rate limit/i.test(m) ? "GitHub 限额，过一会再试"
+      if (/bad credentials|requires authentication|unauthorized/i.test(m)) {
+        localStorage.removeItem(GK);
+        if (gbtn) gbtn.textContent = "登录";
+        const tok = document.querySelector("#mf-tok");
+        if (tok) { tok.value = ""; tok.hidden = true; }
+        st("登录失效，点登录");
+      } else st(/rate limit/i.test(m) ? "GitHub 限额，过一会再试"
         : /not accessible/i.test(m) ? "Token 无 Gist 权限"
         : /Failed to fetch|NetworkError|network/i.test(m) ? "网络失败"
         : m === "token" ? "填 Token 或 Gist ID"
@@ -3979,7 +3985,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=73", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=75", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
