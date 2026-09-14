@@ -2379,9 +2379,10 @@ setCity(city, true);
       mealB.classList.toggle("on", !!rec.meal);
     }
     let wEl = c.querySelector(".mwhen");
-    if (want && rec.meal) {
-      const h = c.querySelector(":scope > header");
-      const h3 = h && h.querySelector("h3");
+    const h = c.querySelector(":scope > header");
+    const h3 = h && h.querySelector("h3");
+    const hasBf = h && [...h.querySelectorAll(":scope > em")].some(el => el !== wEl && !el.classList.contains("mwhen"));
+    if (want && rec.meal && !(rec.meal === "breakfast" && hasBf)) {
       if (!wEl) {
         wEl = document.createElement("em");
         wEl.className = "mwhen";
@@ -3978,7 +3979,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=71", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=73", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
