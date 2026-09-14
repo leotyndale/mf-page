@@ -1,4 +1,4 @@
-const K = "mf-9";
+const K = "mf-10";
 const TK = "mf-tiles";
 const TILE_MAX = 1500;
 const PRE = ["./index.html", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest"];
@@ -8,6 +8,10 @@ self.addEventListener("install", e => {
   e.waitUntil((async () => {
     const c = await caches.open(K);
     await Promise.all(PRE.map(u => c.add(u).catch(() => {})));
+    try {
+      const r = await fetch("./mf-ver.txt", { cache: "no-store" });
+      if (r.ok) await c.put("./mf-ver", new Response((await r.text()).trim()));
+    } catch {}
   })());
 });
 
@@ -16,8 +20,6 @@ self.addEventListener("activate", e => {
     const keys = await caches.keys();
     await Promise.all(keys.filter(x => x !== K && x !== TK).map(x => caches.delete(x)));
     await self.clients.claim();
-    const list = await self.clients.matchAll({ type: "window" });
-    list.forEach(c => c.postMessage({ type: "mf-ver" }));
   })());
 });
 
@@ -98,17 +100,48 @@ async function putPage(cache, res) {
   await cache.put(root, res.clone());
 }
 
+async function remoteVer() {
+  const r = await fetch("./mf-ver.txt", { cache: "no-store" });
+  if (!r.ok) return "";
+  return (await r.text()).trim();
+}
+
+async function cachedVer(cache) {
+  const hit = await cache.match("./mf-ver");
+  return hit ? (await hit.text()).trim() : "";
+}
+
+async function refreshIfNew(cache, req) {
+  try {
+    const remote = await remoteVer();
+    if (!remote) return;
+    const prev = await cachedVer(cache);
+    if (remote === prev) return;
+    const res = await fetch(req, { cache: "no-cache" });
+    if (!res.ok) return;
+    await putPage(cache, res);
+    await cache.put("./mf-ver", new Response(remote));
+    const list = await self.clients.matchAll({ type: "window" });
+    list.forEach(c => c.postMessage({ type: "mf-ver" }));
+  } catch {}
+}
+
 async function page(req) {
   const cache = await caches.open(K);
+  const cached = await matchPage(cache);
+  if (cached) {
+    refreshIfNew(cache, req);
+    return cached;
+  }
   try {
     const res = await fetch(req, { cache: "no-cache" });
     if (res.ok) {
       await putPage(cache, res);
+      const v = await remoteVer();
+      if (v) await cache.put("./mf-ver", new Response(v));
       return res;
     }
   } catch {}
-  const cached = await matchPage(cache);
-  if (cached) return cached;
   return Response.error();
 }
 
