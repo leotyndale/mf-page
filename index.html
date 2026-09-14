@@ -2110,6 +2110,7 @@ setCity(city, true);
     return (p && p.id.indexOf("city-") === 0) ? p.id.slice(5) : city();
   }
   const TAGS = ["想去", "已订", "不想去"];
+  const MEAL_LAB = [["breakfast", "早"], ["lunch", "午"], ["dinner", "晚"]];
   const sortEl = document.querySelector("#sort");
   const SK = "mf-notes", HK = "mf-here", FNAME = "mf-notes.json", GK = "mf-gist";
   const GIST_ID = "86fd817d6275569307e519b097f242ec";
@@ -2299,7 +2300,7 @@ setCity(city, true);
     const see = c.classList.contains("see");
     return '<div class="macts">'
       + '<button type="button" class="mtrig" data-menu="mark">标记</button>'
-      + (see ? "" : '<button type="button" class="mtrig hide" data-menu="meal">时段</button>')
+      + (see ? "" : '<button type="button" class="mtrig" data-menu="meal">时段</button>')
       + '</div><input class="mmemo" type="text" placeholder="备注" enterkeyhint="done">';
   }
   function stampNote(c, note) {
@@ -2322,7 +2323,7 @@ setCity(city, true);
       c.appendChild(box);
       return;
     }
-    if (!box.querySelector(".macts")) {
+    if (!box.querySelector(".macts") || (!c.classList.contains("see") && !box.querySelector('[data-menu="meal"]'))) {
       const note = (box.querySelector(".mmemo") || {}).value || "";
       box.innerHTML = mineHtml(c);
       const inp = box.querySelector(".mmemo");
@@ -2374,21 +2375,18 @@ setCity(city, true);
     }
     const mealB = c.querySelector(':scope > .mine .mtrig[data-menu="meal"]');
     if (mealB) {
-      mealB.classList.toggle("hide", !want);
+      mealB.classList.remove("hide");
       mealB.textContent = MEAL[rec.meal] || "时段";
       mealB.classList.toggle("on", !!rec.meal);
     }
-    let wEl = c.querySelector(".mwhen");
-    const h = c.querySelector(":scope > header");
-    const h3 = h && h.querySelector("h3");
-    const hasBf = h && [...h.querySelectorAll(":scope > em")].some(el => el !== wEl && !el.classList.contains("mwhen"));
-    if (want && rec.meal && !(rec.meal === "breakfast" && hasBf)) {
+    let wEl = c.querySelector(":scope > .mwhen");
+    if (want && rec.meal) {
       if (!wEl) {
         wEl = document.createElement("em");
-        wEl.className = "mwhen";
+        wEl.className = "mwhen mtrig";
+        wEl.dataset.menu = "meal";
+        c.appendChild(wEl);
       }
-      if (h && h3 && wEl.parentElement !== h) h.insertBefore(wEl, h3);
-      else if (!h && !wEl.parentElement) c.appendChild(wEl);
       wEl.textContent = MEAL[rec.meal] || "";
     } else if (wEl) wEl.remove();
     const inp = c.querySelector(":scope > .mine .mmemo");
@@ -2459,7 +2457,6 @@ setCity(city, true);
     qEl.oninput = () => { clearTimeout(qt); qt = setTimeout(window.apply, 140); };
   }
 
-  const MEAL_LAB = [["breakfast", "早"], ["lunch", "午"], ["dinner", "晚"]];
   let menuEl, menuCard, menuTrig, menuLock = 0;
   function closeMenu() {
     if (!menuEl) return;
@@ -3427,6 +3424,14 @@ main.compact .card:not(.open) nav,
 main.compact .card:not(.open) .macts,
 main.compact .card:not(.open) .mmemo,
 main.compact .card:not(.open) .mine { display: none !important; }
+main.compact .card:not(.open) > .mwhen {
+  display: flex !important; align-items: center; justify-content: center;
+  grid-column: 3; grid-row: 1; width: 18px; height: 16px; margin: 0;
+  border-radius: 8px; background: #ead6c0;
+  font-size: 10px; font-weight: 650; font-style: normal; color: var(--gold);
+  cursor: pointer;
+}
+html:not([data-star="want"]) main.compact .card:not(.open) > .mwhen { display: none !important; }
 main.compact .card:not(.open) > .mnote {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
   overflow: hidden; grid-column: 1 / -1; grid-row: 2;
@@ -3435,9 +3440,6 @@ main.compact .card:not(.open) > .mnote {
 }
 main.compact .card.open > .mnote,
 main:not(.compact) .mnote { display: none !important; }
-html[data-star="want"] main.compact .card:not(.open) {
-  grid-template-columns: 36px minmax(0,1fr) 48px 56px;
-}
 main.compact .card.open { cursor: default; }
 main.compact .card.open header,
 main.compact .card.open .loc,
@@ -3483,14 +3485,15 @@ main.compact .card.open .kv[data-k]::before { display: none; }
 main.compact .card.open nav { order: 9; margin-top: 8px; }
 html[data-star="want"] #sort.sortbar,
 html[data-star="want"] main.compact .card:not(.open) {
-  grid-template-columns: 36px minmax(0,1fr) 48px 56px;
+  grid-template-columns: 36px minmax(0,1fr) 18px 48px 56px;
 }
 html[data-star="want"] .sortbar [data-sort="age"],
 html[data-star="want"] .sortbar [data-sort="go"] { display: none; }
-html[data-star="want"] .sortbar [data-sort="dist"] { grid-column: 3; }
-html[data-star="want"] .sortbar [data-sort="price"] { grid-column: 4; }
-html[data-star="want"] main.compact .card:not(.open) .mdist { grid-column: 3; }
-html[data-star="want"] main.compact .card:not(.open)::after { grid-column: 4; }
+html[data-star="want"] .sortbar [data-sort="dist"] { grid-column: 4; }
+html[data-star="want"] .sortbar [data-sort="price"] { grid-column: 5; }
+html[data-star="want"] main.compact .card:not(.open) .mdist { grid-column: 4; }
+html[data-star="want"] main.compact .card:not(.open)::after { grid-column: 5; }
+html[data-star="want"] main.compact .card:not(.open) header > em:not(.mwhen) { display: none !important; }
 html[data-star="want"] main.compact .card:not(.open) .mage,
 html[data-star="want"] main.compact .card:not(.open) .mgo { display: none !important; }
 main:not(.compact) .mwhen,
@@ -3572,7 +3575,7 @@ main.compact .card.open .mwhen { display: none !important; }
   stampMeta();
 
   function inTitle(card, e) {
-    if (e.target.closest("button, .mine, .kv, nav, .mwhy, .mmemo")) return false;
+    if (e.target.closest("button, .mine, .mwhen, .kv, nav, .mwhy, .mmemo")) return false;
     const head = card.querySelector(":scope > header");
     const loc = card.querySelector(":scope > .loc");
     const botEl = loc || head;
@@ -3597,7 +3600,7 @@ main.compact .card.open .mwhen { display: none !important; }
       dropPress();
       return;
     }
-    if (e.target.closest("button")) return;
+    if (e.target.closest("button, .mwhen, .mtrig")) return;
     e.preventDefault();
     const open = () => {
       mainEl.querySelectorAll(".card.open").forEach(closeCard);
@@ -3613,7 +3616,7 @@ main.compact .card.open .mwhen { display: none !important; }
     pressEl = null;
   }
   function canPress(card, e) {
-    if (e.target.closest("button, .mine, .kv, nav, .mwhy, .mmemo, input, textarea")) return false;
+    if (e.target.closest("button, .mine, .mwhen, .kv, nav, .mwhy, .mmemo, input, textarea")) return false;
     return !card.classList.contains("open") || inTitle(card, e);
   }
   mainEl.addEventListener("pointerdown", e => {
@@ -3985,7 +3988,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=75", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=79", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
