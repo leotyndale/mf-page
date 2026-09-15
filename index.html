@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="107">
+<html lang="zh-CN" data-city="paris" data-ver="108">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v107</title>
+<title>工作笔记 v108</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v107</b>
+      <b class="ver" id="mfver">v108</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -1788,7 +1788,7 @@ function outHref(href) {
     return "intent://" + u.host + u.pathname + u.search + u.hash
       + "#Intent;scheme=" + u.protocol.replace(":", "")
       + ";action=android.intent.action.VIEW"
-      + ";component=com.android.chrome/org.chromium.chrome.browser.ChromeTabbedActivity"
+      + ";package=com.android.browser"
       + ";end";
   }
   if (/iPhone|iPad|iPod/i.test(ua)) return "x-safari-" + u.href;
@@ -1810,7 +1810,13 @@ document.addEventListener("touchstart", e => {
 }, { capture: true, passive: true });
 document.addEventListener("click", e => {
   const a = e.target.closest("a[href]");
-  if (a && !a.closest("#mmenu")) paintOut(a);
+  if (!a || a.closest("#mmenu")) return;
+  paintOut(a);
+  const href = a.getAttribute("href") || "";
+  if (/^intent:/i.test(href)) {
+    e.preventDefault();
+    location.href = href;
+  }
 }, true);
 window.mfPaintOut = paintOut;
 
@@ -4103,7 +4109,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=107", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=108", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
