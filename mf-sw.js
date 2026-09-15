@@ -1,4 +1,4 @@
-const K = "mf-10";
+const K = "mf-11";
 const TK = "mf-tiles";
 const TILE_MAX = 1500;
 const PRE = ["./index.html", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest"];
