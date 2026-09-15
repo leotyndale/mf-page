@@ -2701,14 +2701,18 @@ setCity(city, true);
     if (c.token) return parseGist(await gapi("/gists/" + c.id, c.token));
     throw new Error("拉取失败");
   }
+  let putting = Promise.resolve();
   function cloudPut(c) {
     if (!(c && c.id && c.token) || rateBlocked()) return Promise.resolve();
-    const body = JSON.stringify(pack());
-    if (body === lastSent) return Promise.resolve();
-    return gapi("/gists/" + c.id, c.token, {
-      method: "PATCH",
-      body: JSON.stringify({ files: { [FNAME]: { content: body } } })
-    }).then(() => { lastSent = body; });
+    putting = putting.catch(() => {}).then(() => {
+      const body = JSON.stringify(pack());
+      if (body === lastSent) return;
+      return gapi("/gists/" + c.id, c.token, {
+        method: "PATCH",
+        body: JSON.stringify({ files: { [FNAME]: { content: body } } })
+      }).then(() => { lastSent = body; });
+    });
+    return putting;
   }
   function mergeNotes(remoteNotes) {
     const loc = notesOnly(db), rem = notesOnly(remoteNotes);
@@ -4026,7 +4030,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=93", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=94", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
