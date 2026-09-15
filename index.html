@@ -1768,6 +1768,23 @@ function blankLinks(root) {
     a.rel = "noopener noreferrer";
   });
 }
+function openOut(href) {
+  const ua = navigator.userAgent || "";
+  try {
+    const u = new URL(href, location.href);
+    if (/Android/i.test(ua)) {
+      location.href = "intent://" + u.host + u.pathname + u.search + u.hash
+        + "#Intent;scheme=" + u.protocol.replace(":", "")
+        + ";action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end";
+      return;
+    }
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      location.href = "x-safari-" + u.href;
+      return;
+    }
+  } catch (err) {}
+  window.open(href, "_blank", "noopener,noreferrer");
+}
 document.addEventListener("click", e => {
   const a = e.target.closest("a[href]");
   if (!a || a.closest("#mmenu")) return;
@@ -1781,7 +1798,7 @@ document.addEventListener("click", e => {
   if (!inApp) return;
   e.preventDefault();
   e.stopPropagation();
-  if (!window.open(href, "_blank", "noopener,noreferrer")) location.href = href;
+  openOut(href);
 }, true);
 
 function setCity(next, skipHash) {
@@ -4061,7 +4078,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=102", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=103", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
