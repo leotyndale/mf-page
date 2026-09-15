@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris">
+<html lang="zh-CN" data-city="paris" data-ver="104">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记</title>
+<title>工作笔记 v104</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -901,6 +901,7 @@ body.maplock header.top { z-index: 2100; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+.ver { flex: none; margin: 0 6px 0 0; font-size: 11px; font-weight: 650; color: var(--muted); letter-spacing: .04em; }
 .mapwrap { height: clamp(180px, 46vw, 300px); }
 #msheet.mapsheet { left: 8px; right: 8px; bottom: 8px; max-height: none;
   overflow: hidden; border-radius: 10px; padding: 0; }
@@ -999,6 +1000,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
         <button type="button" data-star="skip">不想去</button>
       </div>
     </div>
+    <b class="ver" id="mfver">v104</b>
     <button type="button" id="ccy" class="ccy" aria-label="人民币，点按切欧元">¥</button>
   </div>
   <div class="tabbar">
@@ -1662,7 +1664,8 @@ function apply() {
     h.textContent = n ? lab + " " + n : lab;
   });
   countEl.textContent = (boxed() ? shown + " 家" : shown + " / " + total + " 家")
-    + ((dayF || mealF) && !shown ? " · 无匹配或暂无时段" : "");
+    + ((dayF || mealF) && !shown ? " · 无匹配或暂无时段" : "")
+    + " · v" + (document.documentElement.dataset.ver || "");
   const tog = document.querySelector("#ftog");
   if (tog) tog.classList.toggle("hot", (star === "want" && !!slotF) || !statDef()
     || !!(dayF || mealF || arr || cui || carte || hotelF || extraF || t));
@@ -1768,37 +1771,29 @@ function blankLinks(root) {
     a.rel = "noopener noreferrer";
   });
 }
-function openOut(href) {
+function outHref(href) {
   const ua = navigator.userAgent || "";
-  try {
-    const u = new URL(href, location.href);
-    if (/Android/i.test(ua)) {
-      location.href = "intent://" + u.host + u.pathname + u.search + u.hash
-        + "#Intent;scheme=" + u.protocol.replace(":", "")
-        + ";action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end";
-      return;
-    }
-    if (/iPhone|iPad|iPod/i.test(ua)) {
-      location.href = "x-safari-" + u.href;
-      return;
-    }
-  } catch (err) {}
-  window.open(href, "_blank", "noopener,noreferrer");
+  const u = new URL(href, location.href);
+  if (/Android/i.test(ua)) {
+    return "intent://" + u.host + u.pathname + u.search + u.hash
+      + "#Intent;scheme=" + u.protocol.replace(":", "")
+      + ";action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end";
+  }
+  if (/iPhone|iPad|iPod/i.test(ua)) return "x-safari-" + u.href;
+  return href;
 }
 document.addEventListener("click", e => {
   const a = e.target.closest("a[href]");
   if (!a || a.closest("#mmenu")) return;
-  const href = a.href || "";
+  const href = a.dataset.out || a.href || "";
   if (!/^https?:/i.test(href)) return;
   a.target = "_blank";
   a.rel = "noopener noreferrer";
-  const inApp = navigator.standalone
-    || matchMedia("(display-mode: standalone)").matches
-    || /MicroMessenger|FBAN|FBAV|Instagram|Line\/|wv\)/i.test(navigator.userAgent || "");
-  if (!inApp) return;
+  if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent || "")) return;
   e.preventDefault();
   e.stopPropagation();
-  openOut(href);
+  if (!a.dataset.out) a.dataset.out = href;
+  location.href = outHref(href);
 }, true);
 
 function setCity(next, skipHash) {
@@ -3616,6 +3611,13 @@ main.compact .card.open .mwhen { display: none !important; }
     const pearl = h.match(/黑珍珠[^·]*([一二三])钻/);
     if (pearl) return "珠·" + ({ "一": "1", "二": "2", "三": "3" }[pearl[1]]);
     if (/必吃榜/.test(h)) return "必吃";
+    if (/世界100佳牛排|Big 7[^·]*牛排/.test(h)) return "牛排榜";
+    if (/世界100佳咖啡|Big 7[^·]*咖啡/.test(h)) return "咖啡榜";
+    if (/Big 7[^·]*披萨/.test(h)) return "披萨榜";
+    if (/Big 7[^·]*汉堡/.test(h)) return "汉堡榜";
+    if (/Big 7[^·]*(?:酒吧|鸡尾酒)/.test(h)) return "酒吧榜";
+    if (/Big 7[^·]*素食/.test(h)) return "素食榜";
+    if (/Big 7[^·]*冰淇淋/.test(h)) return "冰淇淋";
     return "";
   }
   function wrapName(h3) {
@@ -4078,7 +4080,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=103", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=104", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
