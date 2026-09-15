@@ -1009,12 +1009,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <button type="button" data-star="1">一星</button>
       <button type="button" data-star="bib">必比登</button>
       <button type="button" data-star="sel">精选</button>
-      <button type="button" data-star="old">老字号</button>
-      <button type="button" data-star="dianping">其他</button>
-      <button type="button" data-star="best">50佳</button>
-      <button type="button" data-star="steak">牛排咖啡</button>
-      <button type="button" data-star="sweet">咖啡烘焙</button>
-      <button type="button" data-star="see">景点</button>
+      <button type="button" data-star="other">其他</button>
     </div>
     <p class="count"></p>
     <button type="button" class="ftog" id="ftog" aria-label="筛选">☰</button>
@@ -1073,6 +1068,18 @@ main.compact .card:not(.open) h3 .zh { display: none; }
         <button type="button" data-carte="" class="on">不限</button>
         <button type="button" data-carte="yes">有</button>
         <button type="button" data-carte="no">无</button>
+      </div>
+    </div>
+    <div class="fg">
+      <span class="lbl">其他</span>
+      <div class="chips" id="fextra">
+        <button type="button" data-extra="" class="on">不限</button>
+        <button type="button" data-extra="old">老字号</button>
+        <button type="button" data-extra="dianping">点评</button>
+        <button type="button" data-extra="best">50佳</button>
+        <button type="button" data-extra="steak">牛排咖啡</button>
+        <button type="button" data-extra="sweet">咖啡烘焙</button>
+        <button type="button" data-extra="see">景点</button>
       </div>
     </div>
     <div class="tools">
@@ -1246,11 +1253,12 @@ const statEl = document.querySelector("#fstat");
 const arrEl = document.querySelector("#farr");
 const cuiEl = document.querySelector("#fcui");
 const carteEl = document.querySelector("#fcarte");
+const extraEl = document.querySelector("#fextra");
 const dayBtns = document.querySelectorAll("#fdays button");
 const mealEl = document.querySelector("#fmeal");
 const hotelEl = document.querySelector("#fhotel");
 const countEl = document.querySelector(".count");
-let star = "all", buckets = new Set(["active", "lost"]), slotF = "";
+let star = "all", buckets = new Set(["active", "lost"]), slotF = "", extraF = "";
 let dayF = "", mealF = "", hotelF = "";
 let ccy = "cny";
 const UK = "mf-ui";
@@ -1407,24 +1415,27 @@ function hoursHit(c) {
   return true;
 }
 function boxed() { return star === "want" || star === "skip" || star === "plan"; }
+function seeing() { return extraF === "see" || star === "see"; }
+function honorOf(c) {
+  return ((c.querySelector('.kv[data-k="honor"] > b') || {}).textContent || "");
+}
+const EXTRA = {
+  old: c => c.dataset.now === "old" || (+c.dataset.born > 0 && +c.dataset.born <= 1950),
+  best: c => /世界(?:50|100|120)佳(?!牛排|咖啡)/.test(honorOf(c)),
+  steak: c => /世界100佳(?:牛排|咖啡)/.test(honorOf(c)),
+  dianping: c => /必吃榜|黑珍珠/.test(honorOf(c)),
+  sweet: c => /茶室|烘焙|咖啡|甜品|巧克力|冰淇淋/.test(c.dataset.cuisine || ""),
+};
+function extraHit(c) {
+  if (extraF === "see") return false;
+  if (extraF) return EXTRA[extraF] ? EXTRA[extraF](c) : true;
+  if (star === "other") return Object.keys(EXTRA).some(k => EXTRA[k](c));
+  return true;
+}
 function tagHit(c) {
   if (star === "want") return c.dataset.box === "want";
   if (star === "skip") return c.dataset.park === "skip";
   if (star === "plan") return c.dataset.box === "want" && c.dataset.day === (window.mfPlanDay || "");
-  if (star === "old") return c.dataset.now === "old" || (+c.dataset.born > 0 && +c.dataset.born <= 1950);
-  if (star === "best") {
-    const h = ((c.querySelector('.kv[data-k="honor"] > b') || {}).textContent || "");
-    return /世界(?:50|100|120)佳(?!牛排|咖啡)/.test(h);
-  }
-  if (star === "steak") {
-    const h = ((c.querySelector('.kv[data-k="honor"] > b') || {}).textContent || "");
-    return /世界100佳(?:牛排|咖啡)/.test(h);
-  }
-  if (star === "dianping") {
-    const h = ((c.querySelector('.kv[data-k="honor"] > b') || {}).textContent || "");
-    return /必吃榜|黑珍珠/.test(h);
-  }
-  if (star === "sweet") return /茶室|烘焙|咖啡|甜品|巧克力|冰淇淋/.test(c.dataset.cuisine || "");
   return true;
 }
 function slotHit(c) {
@@ -1432,9 +1443,8 @@ function slotHit(c) {
   return (c.dataset.meal || "") === slotF;
 }
 function starKeys() {
-  if (star === "see") return [];
-  if (boxed() || star === "all" || star === "old" || star === "best" || star === "steak" || star === "dianping") return ["3", "2", "1", "bib", "plate", "sel", "old", "sweet", "eat"];
-  if (star === "sweet") return ["old", "sweet"];
+  if (seeing()) return [];
+  if (boxed() || star === "all" || star === "other") return ["3", "2", "1", "bib", "plate", "sel", "old", "sweet", "eat"];
   if (star === "sel") return ["plate", "sel"];
   return [star];
 }
@@ -1525,7 +1535,9 @@ function splitMeals(list, bySort) {
 }
 function apply() {
   document.documentElement.dataset.star = star;
-  if (star === "see") {
+  extraF = chipVal(extraEl, "extra");
+  document.documentElement.dataset.extra = extraF;
+  if (seeing()) {
     pane().querySelectorAll(":scope > .parkh, :scope > .mealh").forEach(h => h.classList.add("hide"));
     saveUi();
     renderMap();
@@ -1552,7 +1564,7 @@ function apply() {
       total++;
       if (!c.dataset.q) c.dataset.q = c.textContent.toLowerCase();
       const hit = (!t || c.dataset.q.includes(t))
-        && tagHit(c) && slotHit(c)
+        && tagHit(c) && extraHit(c) && slotHit(c)
         && (!arr || c.dataset.arr === arr)
         && (!cui || c.dataset.cuisine === cui)
         && (!carte || c.dataset.carte === carte)
@@ -1645,7 +1657,7 @@ function apply() {
     + ((dayF || mealF) && !shown ? " · 无匹配或暂无时段" : "");
   const tog = document.querySelector("#ftog");
   if (tog) tog.classList.toggle("hot", (star === "want" && !!slotF) || !statDef()
-    || !!(dayF || mealF || arr || cui || carte || hotelF || t));
+    || !!(dayF || mealF || arr || cui || carte || hotelF || extraF || t));
   saveUi();
   renderMap();
 }
@@ -1667,6 +1679,7 @@ function saveUi() {
   localStorage.setItem(UK, JSON.stringify({
     city, star, buckets: [...buckets], day: dayF, meal: mealF,
     sort: sortKey(), carte: chipVal(carteEl, "carte"), q: q.value, ccy, slot: slotF,
+    extra: extraF,
     hotel: hotelF,
     poi: { stay: !!poiOn.stay, ride: !!poiOn.ride, see: !!poiOn.see },
     poiVer: 2,
@@ -1688,7 +1701,12 @@ window.mfApplyRemoteUi = applyRemoteUi;
 function restoreUi(forCity, global) {
   const ui = loadUi();
   if (global) {
-    const st = ui.star === "plate" ? "sel" : ui.star;
+    let st = ui.star === "plate" ? "sel" : ui.star;
+    extraF = ui.extra || "";
+    if (EXTRA[st] || st === "see") {
+      extraF = extraF || st;
+      st = "other";
+    }
     if (st && [...starTabs].some(b => b.dataset.star === st)) star = st;
     if (Array.isArray(ui.buckets) && ui.buckets.length) buckets = new Set(ui.buckets);
     setChip(statEl, "stat", ["active", "lost", "closed"].filter(k => buckets.has(k)).join(","));
@@ -1700,6 +1718,7 @@ function restoreUi(forCity, global) {
     setChip(slotEl, "slot", ui.slot || "");
     slotF = chipVal(slotEl, "slot");
     setChip(carteEl, "carte", ui.carte || "");
+    setChip(extraEl, "extra", extraF);
     if (ui.q) q.value = ui.q;
     if (ui.ccy === "eur" || ui.ccy === "cny") ccy = ui.ccy;
     if (ui.poi) Object.assign(poiOn, { stay: !!ui.poi.stay, ride: !!ui.poi.ride, see: !!ui.poi.see });
@@ -1824,6 +1843,7 @@ if (hotelEl) hotelEl.onchange = apply;
 if (arrEl) arrEl.onchange = apply;
 if (cuiEl) cuiEl.onchange = apply;
 bindChips(carteEl, "carte", () => apply());
+bindChips(extraEl, "extra", v => { extraF = v; mapTouched = false; show(); });
 const freset = document.querySelector("#freset");
 if (freset) freset.onclick = () => {
   dayF = mealF = hotelF = slotF = "";
@@ -1832,11 +1852,13 @@ if (freset) freset.onclick = () => {
   if (arrEl) arrEl.value = "";
   if (cuiEl) cuiEl.value = "";
   if (hotelEl) hotelEl.value = "";
+  extraF = "";
   dayBtns.forEach(b => b.classList.toggle("on", !(b.dataset.day || "")));
   setChip(statEl, "stat", "active,lost");
   setChip(mealEl, "meal", "");
   setChip(carteEl, "carte", "");
   setChip(slotEl, "slot", "");
+  setChip(extraEl, "extra", "");
   syncBfHint();
   apply();
 };
@@ -1905,7 +1927,7 @@ function syncMapGestures() {
 function viewMap() {
   if (!map) return;
   const pts = [];
-  if (star !== "see") {
+  if (!seeing()) {
     pane().querySelectorAll(":scope > section:not([hidden]) .card:not(.hide)").forEach(c => {
       if (c.dataset.lat && c.dataset.park !== "skip") pts.push([+c.dataset.lat, +c.dataset.lng]);
     });
@@ -3690,7 +3712,8 @@ main.compact .card.open .mwhen { display: none !important; }
   const css = document.createElement("style");
   css.textContent = `
 #sees.hide, html[data-star="plan"] #sees { display: none; }
-html[data-star="see"] .citypane > section { display: none; }
+html[data-star="see"] .citypane > section,
+html[data-extra="see"] .citypane > section { display: none; }
 main.compact .card.see header { min-width: 0; }
 main.compact .card.see:not(.open) .mwhy { display: none; }
 main.compact .card.see.open .mwhy { grid-column: 1 / -1; order: 8; }
@@ -3827,7 +3850,7 @@ main.compact .card.see:not(.open) .kv[data-k="bio"] > b {
       if (field === "dist") return (a.dist - b.dist) * dir;
       return ((a.p.green || 0) - (b.p.green || 0)) * dir || a.p.name.localeCompare(b.p.name);
     });
-    const show = star === "see";
+    const show = star === "see" || document.documentElement.dataset.extra === "see";
     box.classList.toggle("hide", !show);
     if (!show) return;
     if (countEl) countEl.textContent = rows.length + " 处";
@@ -4030,7 +4053,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=94", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=95", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
