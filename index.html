@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="105">
+<html lang="zh-CN" data-city="paris" data-ver="106">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v105</title>
+<title>工作笔记 v106</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v105</b>
+      <b class="ver" id="mfver">v106</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -1769,7 +1769,17 @@ function blankLinks(root) {
   (root || document).querySelectorAll("main a[href], #msheet a[href]").forEach(a => {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
+    paintOut(a);
   });
+}
+function appLink(href) {
+  try {
+    const u = new URL(href, location.href);
+    const h = u.hostname, p = u.pathname;
+    return h === "maps.apple.com" || h === "maps.google.com"
+      || (/\.google\./.test(h) && p.indexOf("/maps") === 0)
+      || /(^|\.)michelin\.com$/.test(h);
+  } catch { return false; }
 }
 function outHref(href) {
   const ua = navigator.userAgent || "";
@@ -1777,24 +1787,31 @@ function outHref(href) {
   if (/Android/i.test(ua)) {
     return "intent://" + u.host + u.pathname + u.search + u.hash
       + "#Intent;scheme=" + u.protocol.replace(":", "")
-      + ";action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end";
+      + ";action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE"
+      + ";package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent(u.href)
+      + ";end";
   }
   if (/iPhone|iPad|iPod/i.test(ua)) return "x-safari-" + u.href;
   return href;
 }
+function paintOut(a) {
+  if (!a || a.dataset.out) return;
+  const href = a.getAttribute("href") || "";
+  if (!/^https?:/i.test(href) || appLink(href)) return;
+  if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent || "")) return;
+  a.dataset.out = href;
+  a.setAttribute("href", outHref(href));
+  a.removeAttribute("target");
+}
+document.addEventListener("touchstart", e => {
+  const a = e.target.closest("a[href]");
+  if (a && !a.closest("#mmenu")) paintOut(a);
+}, { capture: true, passive: true });
 document.addEventListener("click", e => {
   const a = e.target.closest("a[href]");
-  if (!a || a.closest("#mmenu")) return;
-  const href = a.dataset.out || a.href || "";
-  if (!/^https?:/i.test(href)) return;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent || "")) return;
-  e.preventDefault();
-  e.stopPropagation();
-  if (!a.dataset.out) a.dataset.out = href;
-  location.href = outHref(href);
+  if (a && !a.closest("#mmenu")) paintOut(a);
 }, true);
+window.mfPaintOut = paintOut;
 
 function setCity(next, skipHash) {
   if (!CITIES[next]) next = "paris";
@@ -2346,6 +2363,10 @@ setCity(city, true);
     if ([...b.querySelectorAll("a")].some(a => a.href === href || a.textContent === lab)) return;
     const a = ' <a class="mlink" target="_blank" rel="noopener" href="' + href + '">' + lab + "</a>";
     b.insertAdjacentHTML("beforeend", a);
+    if (typeof window.mfPaintOut === "function") {
+      const last = b.querySelector("a.mlink:last-of-type");
+      if (last) window.mfPaintOut(last);
+    }
     if (b.dataset.morig) b.dataset.morig += a;
   }
   function embedMenus(c) {
@@ -2388,6 +2409,7 @@ setCity(city, true);
       + (web && web.indexOf("maps.") < 0 ? '<a class="btn ghost" target="_blank" rel="noopener noreferrer" href="' + web + '">官网</a>' : "")
       + '<a class="btn ghost" target="_blank" rel="noopener noreferrer" href="' + mic + '">米其林</a><a class="btn ghost" target="_blank" rel="noopener noreferrer" href="' + se + '">搜索</a>';
     c.appendChild(nav);
+    if (typeof window.mfPaintOut === "function") nav.querySelectorAll("a[href]").forEach(window.mfPaintOut);
   }
   function mineHtml(c) {
     const see = c.classList.contains("see");
@@ -3921,6 +3943,7 @@ main.compact .card.see:not(.open) .kv[data-k="bio"] > b {
         + '<nav><a class="btn" target="_blank" rel="noopener" href="' + gmap + '">谷歌地图</a>' + web + "</nav></article>";
     }).join("");
     if (typeof window.mfPaintCard === "function") box.querySelectorAll(".card").forEach(window.mfPaintCard);
+    if (typeof window.mfPaintOut === "function") box.querySelectorAll("a[href]").forEach(window.mfPaintOut);
   }
   const _apply = window.apply;
   if (typeof _apply === "function") window.apply = function () { _apply(); paint(); };
@@ -4079,7 +4102,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=105", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=106", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
