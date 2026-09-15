@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="104">
+<html lang="zh-CN" data-city="paris" data-ver="105">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v104</title>
+<title>工作笔记 v105</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -901,7 +901,7 @@ body.maplock header.top { z-index: 2100; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-.ver { flex: none; margin: 0 6px 0 0; font-size: 11px; font-weight: 650; color: var(--muted); letter-spacing: .04em; }
+.ver { flex: none; margin: 0 auto 0 0; font-size: 11px; font-weight: 650; color: var(--muted); letter-spacing: .04em; }
 .mapwrap { height: clamp(180px, 46vw, 300px); }
 #msheet.mapsheet { left: 8px; right: 8px; bottom: 8px; max-height: none;
   overflow: hidden; border-radius: 10px; padding: 0; }
@@ -1000,7 +1000,6 @@ main.compact .card:not(.open) h3 .zh { display: none; }
         <button type="button" data-star="skip">不想去</button>
       </div>
     </div>
-    <b class="ver" id="mfver">v104</b>
     <button type="button" id="ccy" class="ccy" aria-label="人民币，点按切欧元">¥</button>
   </div>
   <div class="tabbar">
@@ -1107,6 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
+      <b class="ver" id="mfver">v105</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -1664,8 +1664,7 @@ function apply() {
     h.textContent = n ? lab + " " + n : lab;
   });
   countEl.textContent = (boxed() ? shown + " 家" : shown + " / " + total + " 家")
-    + ((dayF || mealF) && !shown ? " · 无匹配或暂无时段" : "")
-    + " · v" + (document.documentElement.dataset.ver || "");
+    + ((dayF || mealF) && !shown ? " · 无匹配或暂无时段" : "");
   const tog = document.querySelector("#ftog");
   if (tog) tog.classList.toggle("hot", (star === "want" && !!slotF) || !statDef()
     || !!(dayF || mealF || arr || cui || carte || hotelF || extraF || t));
@@ -1685,20 +1684,21 @@ function pickOpt(el, val) {
 }
 function saveUi() {
   const prev = loadUi();
-  const per = prev.per || {};
+  const per = Object.assign({}, prev.per || {});
   per[city] = { arr: arrEl ? arrEl.value : "", cui: cuiEl ? cuiEl.value : "" };
-  localStorage.setItem(UK, JSON.stringify({
+  const next = {
     city, star, buckets: [...buckets], day: dayF, meal: mealF,
     sort: sortKey(), carte: chipVal(carteEl, "carte"), q: q.value, ccy, slot: slotF,
-    extra: extraF,
-    hotel: hotelF,
+    extra: extraF, hotel: hotelF,
     poi: { stay: !!poiOn.stay, ride: !!poiOn.ride, see: !!poiOn.see },
-    poiVer: 2,
-    per,
-    ts: Date.now(),
-  }));
+    poiVer: 2, per,
+  };
+  const prevCore = Object.assign({}, prev);
+  delete prevCore.ts;
+  if (JSON.stringify(prevCore) === JSON.stringify(next)) return;
+  next.ts = Date.now();
+  localStorage.setItem(UK, JSON.stringify(next));
   localStorage.setItem("mf-city", city);
-  if (typeof window.mfOnUiSave === "function") window.mfOnUiSave();
 }
 function applyRemoteUi(ui) {
   if (!ui || typeof ui !== "object") return;
@@ -2930,7 +2930,6 @@ setCity(city, true);
   window.mfPaintCard = paint;
   window.mfOnCity = paintAll;
   window.mfEnrich = enrich;
-  window.mfOnUiSave = schedulePush;
   window.mfPutPlan = function (c, day, meal) {
     const rec = recOf(c);
     rec.day = day || "";
@@ -4080,7 +4079,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=104", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=105", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
