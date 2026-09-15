@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="110">
+<html lang="zh-CN" data-city="paris" data-ver="111">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v110</title>
+<title>工作笔记 v111</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v110</b>
+      <b class="ver" id="mfver">v111</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -1766,7 +1766,10 @@ function fillCityOpts(next) {
   if (cuiEl && c) cuiEl.innerHTML = c.innerHTML;
 }
 function blankLinks(root) {
-  (root || document).querySelectorAll("main a[href], #msheet a[href]").forEach(paintOut);
+  (root || document).querySelectorAll("main a[href], #msheet a[href]").forEach(a => {
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+  });
 }
 function appLink(href) {
   try {
@@ -1777,13 +1780,19 @@ function appLink(href) {
       || /(^|\.)michelin\.com$/.test(h);
   } catch { return false; }
 }
-function paintOut(a) {
-  if (!a) return;
-  const href = a.getAttribute("href") || "";
-  if (!/^https?:/i.test(href)) return;
-  a.rel = "noopener noreferrer";
-  if (appLink(href)) { a.target = "_blank"; return; }
-  a.target = "_system";
+function toExternal(href) {
+  try {
+    const u = new URL(href);
+    const ua = navigator.userAgent || "";
+    if (/iPhone|iPad|iPod/i.test(ua)) return "x-safari-" + u.href;
+    if (/Android/i.test(ua)) {
+      return "intent://" + u.host + u.pathname + u.search + u.hash
+        + "#Intent;scheme=" + u.protocol.slice(0, -1)
+        + ";action=android.intent.action.VIEW"
+        + ";category=android.intent.category.BROWSABLE;end";
+    }
+  } catch {}
+  return href;
 }
 document.addEventListener("click", e => {
   const a = e.target.closest("a[href]");
@@ -1791,9 +1800,13 @@ document.addEventListener("click", e => {
   const href = a.getAttribute("href") || "";
   if (!/^https?:/i.test(href) || appLink(href)) return;
   e.preventDefault();
-  window.open(href, "_system");
+  location.href = toExternal(href);
 }, true);
-window.mfPaintOut = paintOut;
+window.mfPaintOut = a => {
+  if (!a) return;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+};
 
 function setCity(next, skipHash) {
   if (!CITIES[next]) next = "paris";
@@ -4084,7 +4097,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=110", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=111", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
