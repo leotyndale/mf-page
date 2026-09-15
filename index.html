@@ -2171,6 +2171,7 @@ setCity(city, true);
   const SK = "mf-notes", HK = "mf-here", FNAME = "mf-notes.json", GK = "mf-gist";
   const GIST_ID = "86fd817d6275569307e519b097f242ec";
   const GIST_USER = "leotyndale";
+  const GIST_TOKEN = "";
   const GH_CLIENT_ID = "Ov23liljDnoOXoMclPBx";
   const GH_PROXY = "https://mf-oauth.eager-airplane.workers.dev";
   const GH_REDIRECT = "https://leotyndale.github.io/mf-page/";
@@ -2612,6 +2613,12 @@ setCity(city, true);
   function gcfg() {
     try { return JSON.parse(localStorage.getItem(GK) || "null"); } catch { return null; }
   }
+  function cred() {
+    const c = gcfg() || {};
+    if (!c.token) c.token = GIST_TOKEN;
+    if (!c.id) c.id = GIST_ID;
+    return c;
+  }
   function gsave(c) { localStorage.setItem(GK, JSON.stringify(c)); }
   function ghdr(token) {
     return {
@@ -2663,7 +2670,7 @@ setCity(city, true);
     throw new Error(msg || "token");
   }
   async function ensureCloud() {
-    let c = gcfg() || {};
+    let c = cred();
     const typed = parseCred((document.querySelector("#mf-tok") || {}).value);
     if (typed.token) c.token = typed.token;
     c.id = GIST_ID;
@@ -2726,7 +2733,7 @@ setCity(city, true);
     }
   }
   function schedulePush() {
-    const c = gcfg();
+    const c = cred();
     if (!(c && c.id && c.token)) return;
     clearTimeout(pushT);
     pushT = setTimeout(() => { cloudPut(c).catch(() => {}); }, 1200);
@@ -2845,8 +2852,8 @@ setCity(city, true);
   }
   const gbtn = document.querySelector("#mf-g");
   if (gbtn) {
-    gbtn.textContent = (gcfg() && gcfg().token) ? "同步" : "登录";
-    gbtn.onclick = () => { const c = gcfg(); if (c && c.token) sync(true); else ghLogin(); };
+    gbtn.textContent = cred().token ? "同步" : "登录";
+    gbtn.onclick = () => { const c = cred(); if (c.token) sync(true); else ghLogin(); };
     gbtn.addEventListener("contextmenu", e => {
       e.preventDefault();
       localStorage.removeItem(GK);
@@ -4019,7 +4026,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=91", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=93", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
