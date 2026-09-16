@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="120">
+<html lang="zh-CN" data-city="paris" data-ver="121">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v120</title>
+<title>工作笔记 v121</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v120</b>
+      <b class="ver" id="mfver">v121</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -2348,7 +2348,9 @@ setCity(city, true);
   function pack() {
     let ui = {};
     try { ui = JSON.parse(localStorage.getItem("mf-ui") || "{}") || {}; } catch { ui = {}; }
-    return { v: 2, notes: notesOnly(db), ui };
+    const book = typeof window.mfBookPack === "function" ? window.mfBookPack()
+      : (() => { try { return JSON.parse(localStorage.getItem("mf-book") || "{}") || {}; } catch { return {}; } })();
+    return { v: 2, notes: notesOnly(db), ui, book };
   }
   function put(c, rec) {
     rec.ts = Date.now();
@@ -2798,6 +2800,10 @@ setCity(city, true);
     mergeNotes(remote);
     persist();
     paintAll();
+    if (remote && remote.book && typeof remote.book === "object") {
+      if (typeof window.mfBookMerge === "function") window.mfBookMerge(remote.book);
+      else try { localStorage.setItem("mf-book-in", JSON.stringify(remote.book)); } catch {}
+    }
     const rui = remote && remote.v === 2 ? remote.ui : null;
     if (rui && typeof rui === "object" && typeof window.mfApplyRemoteUi === "function") {
       let lui = {};
@@ -2957,6 +2963,7 @@ setCity(city, true);
   window.mfPaintCard = paint;
   window.mfOnCity = paintAll;
   window.mfEnrich = enrich;
+  window.mfSyncSoon = schedulePush;
   window.mfPutPlan = function (c, day, meal) {
     const rec = recOf(c);
     rec.day = day || "";
@@ -3760,8 +3767,9 @@ main.compact .card.open .mwhen { display: none !important; }
 <script>
 (() => {
   const DATA = {"book":{"arpège":"14:00","pierre gagnaire":"","épicure (le bristol)":"","le pré catelan":"12:45","kei":"","le gabriel – la réserve":"","la tour d'argent":"","l'ambroisie":"13:15","taillevent":"13:30","lasserre":"","guy savoy":"","la grande table du plaza athénée":"","astrance":"","le grand restaurant – jean-françois piège":"13:30","le clarence":"","maison rostang":"13:30","david toutain":"13:15","l'abysse paris":"","la scène":"","marsan par hélène darroze":"13:30","table – bruno verjus":"13:30","l'oiseau blanc":"13:30","le jules verne":"","blanc":"","alliance":"13:00","virtus":"","relais louis xiii":"","apicius":"13:15","l'atelier de joël robuchon – étoile":"","akrame":"","granite":"13:30","jin":"","nhome":"","omar dhiab":"","pantagruel":"","accents table bourse":"","fleur de pavé":"","shabour":"","sushi b":"12:30","anne":"14:00","datil":"13:30","aldehyde":"","le sergent recruteur":"14:00","at":"13:15","baieta":"","mavrommatis":"","sola":"","solstice":"","armani ristorante":"","quinsou":"13:30","yoshinori":"13:00","ze kitchen galerie":"","auguste":"14:00","divellec":"","gaya par pierre gagnaire":"","nakatani":"13:30","pertinence":"","prévelle":"14:15","tomy & co":"13:15","le violon d'ingres":"","l'arôme":"","contraste":"13:30","le george":"","héritages":"","il carpaccio":"","irwin":"13:30","monsieur dior by yannick alléno":"","onor":"","origines restaurant":"13:30","pavyllon paris":"14:15","trente-trois":"13:15","neso":"","amâlia":"","automne":"","géosmine":"","qui plume la lune":"","septime":"14:00","vaisseau":"","mosuke":"13:00","chakaiseiki akiyoshi":"","pilgrim":"","alan geaam":"13:30","l'archeste":"13:00","don juan ii":"","geoélia":"","la grande cascade":"","nomicos":"","ōrtensia":"","pages":"","substance":"","zostera":"","agapé":"","anona":"13:45","le faham":"","frédéric simonin":"13:45","jacques faussat":"","mallory gabsi":"13:30","oxte":"13:45","sushi shunei":""},"src":{"arpège":"Zenchef","le pré catelan":"Guestonline","l'ambroisie":"Zenchef","taillevent":"TheFork","le grand restaurant – jean-françois piège":"TheFork","maison rostang":"TheFork","david toutain":"TheFork","marsan par hélène darroze":"TheFork","table – bruno verjus":"Zenchef","l'oiseau blanc":"SevenRooms","alliance":"TheFork","apicius":"SevenRooms","granite":"TheFork","sushi b":"TheFork","anne":"Zenchef","datil":"Zenchef","le sergent recruteur":"Zenchef","at":"Zenchef","quinsou":"Zenchef","yoshinori":"Zenchef","auguste":"TheFork","nakatani":"TheFork","prévelle":"Zenchef","tomy & co":"Zenchef","contraste":"TheFork","irwin":"TheFork","origines restaurant":"Zenchef","pavyllon paris":"Zenchef","trente-trois":"Zenchef","septime":"Zenchef","mosuke":"Zenchef","alan geaam":"Zenchef","l'archeste":"Zenchef","anona":"TheFork","frédéric simonin":"Zenchef","mallory gabsi":"Zenchef","oxte":"Zenchef"}};
-  const BOOK = DATA.book, SRC = DATA.src;
-  let bookF = "";
+  const BOOK = DATA.book, SRC = DATA.src, BK = "mf-book";
+  let bookF = "", over = {};
+  try { over = JSON.parse(localStorage.getItem(BK) || "{}") || {}; } catch { over = {}; }
 
   const css = document.createElement("style");
   css.textContent = `
@@ -3773,9 +3781,21 @@ main.compact .card:not(.open) .booklast {
   font-size: 10px; font-weight: 650; font-style: normal;
   color: var(--muted); letter-spacing: 0;
 }
-main.compact .card:not(.open)[data-book-last^="13:45"] .booklast,
-main.compact .card:not(.open)[data-book-last^="14"] .booklast { color: var(--gold); }
+main.compact .card:not(.open) .booklast.late { color: var(--gold); }
 main.compact .card.open .kv[data-k="book"] { order: 5; }
+.kv[data-k="book"] > b {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-weight: 650;
+}
+.bbook {
+  width: 7.2em; height: 28px; padding: 0 8px; border: 0; border-radius: 8px;
+  background: rgba(26,25,23,.04); font: inherit; font-size: 13px; font-weight: 650;
+}
+.bnone {
+  height: 24px; padding: 0 8px; border: 0; border-radius: 8px;
+  background: rgba(26,25,23,.05); font-size: 12px; font-weight: 550;
+}
+.bnone.on { background: #ead6c0; color: var(--gold); }
+.bsrc { font-size: 11px; font-weight: 500; color: var(--muted); font-style: normal; }
 `;
   document.head.appendChild(css);
 
@@ -3785,13 +3805,115 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
       '<div class="fg" id="flunchw"><span class="lbl">订位末席</span>'
       + '<div class="chips" id="flunch">'
       + '<button type="button" data-book="" class="on">不限</button>'
+      + '<button type="button" data-book="1330">13:30+</button>'
       + '<button type="button" data-book="1345">13:45+</button>'
       + '<button type="button" data-book="1400">14:00</button>'
       + '<button type="button" data-book="ok">已核</button>'
+      + '<button type="button" data-book="todo">未核</button>'
       + '<button type="button" data-book="none">无格子</button>'
       + '</div></div>');
   }
   const lunchEl = document.querySelector("#flunch");
+  const paris = document.getElementById("city-paris");
+
+  function persistOver() {
+    try { localStorage.setItem(BK, JSON.stringify(over)); } catch {}
+  }
+  function lastOf(name) {
+    if (name in over) return over[name].last || "";
+    return BOOK[name] || "";
+  }
+  function statOf(name) {
+    if (name in over) return over[name].last ? "ok" : "none";
+    if (BOOK[name]) return "ok";
+    if (name in BOOK) return "todo";
+    return "";
+  }
+  function pillText(last, stat) {
+    return last || (stat === "todo" ? "填" : stat === "none" ? "无" : "");
+  }
+  function stamp(c) {
+    const name = c.dataset.name;
+    if (!(name in BOOK) && !(name in over)) return;
+    const last = lastOf(name);
+    const stat = statOf(name);
+    c.dataset.bookLast = last;
+    c.dataset.bookStat = stat;
+    const h3 = c.querySelector("header h3");
+    let pill = h3 && h3.querySelector(".booklast");
+    const txt = pillText(last, stat);
+    if (h3 && txt) {
+      if (!pill) {
+        pill = document.createElement("b");
+        pill.className = "booklast";
+        h3.appendChild(pill);
+      }
+      pill.textContent = txt;
+      pill.classList.toggle("late", !!(last && last >= "13:30"));
+    } else if (pill) pill.remove();
+    let kv = c.querySelector('.kv[data-k="book"]');
+    if (!kv) {
+      kv = document.createElement("div");
+      kv.className = "kv";
+      kv.dataset.k = "book";
+      kv.innerHTML = "<span>订位</span><b>"
+        + '<input class="bbook" type="time" step="900">'
+        + '<button type="button" class="bnone">无格子</button>'
+        + '<i class="bsrc"></i></b>';
+      const hours = [...c.querySelectorAll(":scope > .kv")].find(el =>
+        (el.querySelector("span") || {}).textContent === "营业");
+      if (hours) hours.after(kv);
+      else c.querySelector("nav")?.before(kv);
+      const inp = kv.querySelector(".bbook");
+      const noneB = kv.querySelector(".bnone");
+      inp.addEventListener("click", e => e.stopPropagation());
+      inp.addEventListener("change", () => save(c, inp.value, false));
+      noneB.addEventListener("click", e => {
+        e.stopPropagation();
+        save(c, "", statOf(c.dataset.name) !== "none");
+      });
+    }
+    const inp = kv.querySelector(".bbook");
+    const noneB = kv.querySelector(".bnone");
+    const src = kv.querySelector(".bsrc");
+    if (inp && document.activeElement !== inp) inp.value = last;
+    if (noneB) noneB.classList.toggle("on", stat === "none");
+    if (src) src.textContent = SRC[name] ? SRC[name] : (stat === "todo" ? "核完填时段" : "");
+  }
+  function stampAll() {
+    if (!paris) return;
+    paris.querySelectorAll(".card[data-name]").forEach(stamp);
+  }
+  function save(c, raw, none) {
+    const name = c.dataset.name;
+    if (!name) return;
+    if (none) over[name] = { last: "", ts: Date.now() };
+    else {
+      const m = String(raw || "").trim().match(/^(\d{1,2}):(\d{2})$/);
+      const last = m && +m[1] < 24 && +m[2] < 60
+        ? String(+m[1]).padStart(2, "0") + ":" + m[2] : "";
+      if (last) over[name] = { last, ts: Date.now() };
+      else delete over[name];
+    }
+    persistOver();
+    stamp(c);
+    if (typeof window.mfSyncSoon === "function") window.mfSyncSoon();
+    if (typeof apply === "function") apply();
+  }
+  function mergeBook(remote) {
+    if (!remote || typeof remote !== "object") return;
+    Object.keys(remote).forEach(name => {
+      const x = remote[name], y = over[name];
+      if (!x || typeof x !== "object") return;
+      if (!y || (x.ts || 0) >= (y.ts || 0))
+        over[name] = { last: x.last || "", ts: x.ts || 0 };
+    });
+    persistOver();
+    stampAll();
+    if (typeof apply === "function") apply();
+  }
+  window.mfBookPack = () => over;
+  window.mfBookMerge = mergeBook;
 
   function setOn(val) {
     if (!lunchEl) return;
@@ -3800,42 +3922,27 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
     });
   }
 
-  const paris = document.getElementById("city-paris");
-  if (paris) {
-    paris.querySelectorAll(".card[data-name]").forEach(c => {
-      const name = c.dataset.name;
-      if (!(name in BOOK)) return;
-      const last = BOOK[name];
-      c.dataset.bookLast = last;
-      const h3 = c.querySelector("header h3");
-      if (h3 && last && !h3.querySelector(".booklast")) {
-        const b = document.createElement("b");
-        b.className = "booklast";
-        b.textContent = last;
-        h3.appendChild(b);
-      }
-      if (c.querySelector('.kv[data-k="book"]')) return;
-      const kv = document.createElement("div");
-      kv.className = "kv";
-      kv.dataset.k = "book";
-      const lab = last ? (last + (SRC[name] ? " · " + SRC[name] : "")) : "无公开格子";
-      kv.innerHTML = "<span>订位</span><b>" + lab + "</b>";
-      const hours = [...c.querySelectorAll(":scope > .kv")].find(el => (el.querySelector("span") || {}).textContent === "营业");
-      if (hours) hours.after(kv);
-      else c.querySelector("nav")?.before(kv);
-    });
-  }
+  stampAll();
+  try {
+    const pending = JSON.parse(localStorage.getItem("mf-book-in") || "null");
+    if (pending) {
+      localStorage.removeItem("mf-book-in");
+      mergeBook(pending);
+    }
+  } catch {}
 
   window.mfLunchHit = function (c) {
     if (!bookF) return true;
     if (document.documentElement.dataset.city !== "paris") return true;
     if (c.classList.contains("see")) return true;
     const last = c.dataset.bookLast;
-    const known = Object.prototype.hasOwnProperty.call(c.dataset, "bookLast");
+    const stat = c.dataset.bookStat;
+    if (bookF === "1330") return !!(last && last >= "13:30");
     if (bookF === "1345") return !!(last && last >= "13:45");
     if (bookF === "1400") return !!(last && last >= "14:00");
-    if (bookF === "ok") return !!last;
-    if (bookF === "none") return known && !last;
+    if (bookF === "ok") return stat === "ok";
+    if (bookF === "todo") return stat === "todo";
+    if (bookF === "none") return stat === "none";
     return true;
   };
   window.mfLunchOn = () => !!bookF;
@@ -4215,7 +4322,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=120", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=121", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
