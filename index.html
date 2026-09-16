@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="119">
+<html lang="zh-CN" data-city="paris" data-ver="120">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v119</title>
+<title>工作笔记 v120</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v119</b>
+      <b class="ver" id="mfver">v120</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -1579,7 +1579,8 @@ function apply() {
         && (!cui || c.dataset.cuisine === cui)
         && (!carte || c.dataset.carte === carte)
         && hotelHit(c)
-        && hoursHit(c);
+        && hoursHit(c)
+        && (!window.mfLunchHit || mfLunchHit(c));
       c.classList.toggle("hide", !hit);
       stampPrice(c);
       if (hit) {
@@ -1667,7 +1668,8 @@ function apply() {
     + ((dayF || mealF) && !shown ? " · 无匹配或暂无时段" : "");
   const tog = document.querySelector("#ftog");
   if (tog) tog.classList.toggle("hot", (star === "want" && !!slotF) || !statDef()
-    || !!(dayF || mealF || arr || cui || carte || hotelF || extraF || t));
+    || !!(dayF || mealF || arr || cui || carte || hotelF || extraF || t)
+    || (window.mfLunchOn && mfLunchOn()));
   saveUi();
   renderMap();
 }
@@ -3757,6 +3759,114 @@ main.compact .card.open .mwhen { display: none !important; }
 </script>
 <script>
 (() => {
+  const DATA = {"book":{"arpège":"14:00","pierre gagnaire":"","épicure (le bristol)":"","le pré catelan":"12:45","kei":"","le gabriel – la réserve":"","la tour d'argent":"","l'ambroisie":"13:15","taillevent":"13:30","lasserre":"","guy savoy":"","la grande table du plaza athénée":"","astrance":"","le grand restaurant – jean-françois piège":"13:30","le clarence":"","maison rostang":"13:30","david toutain":"13:15","l'abysse paris":"","la scène":"","marsan par hélène darroze":"13:30","table – bruno verjus":"13:30","l'oiseau blanc":"13:30","le jules verne":"","blanc":"","alliance":"13:00","virtus":"","relais louis xiii":"","apicius":"13:15","l'atelier de joël robuchon – étoile":"","akrame":"","granite":"13:30","jin":"","nhome":"","omar dhiab":"","pantagruel":"","accents table bourse":"","fleur de pavé":"","shabour":"","sushi b":"12:30","anne":"14:00","datil":"13:30","aldehyde":"","le sergent recruteur":"14:00","at":"13:15","baieta":"","mavrommatis":"","sola":"","solstice":"","armani ristorante":"","quinsou":"13:30","yoshinori":"13:00","ze kitchen galerie":"","auguste":"14:00","divellec":"","gaya par pierre gagnaire":"","nakatani":"13:30","pertinence":"","prévelle":"14:15","tomy & co":"13:15","le violon d'ingres":"","l'arôme":"","contraste":"13:30","le george":"","héritages":"","il carpaccio":"","irwin":"13:30","monsieur dior by yannick alléno":"","onor":"","origines restaurant":"13:30","pavyllon paris":"14:15","trente-trois":"13:15","neso":"","amâlia":"","automne":"","géosmine":"","qui plume la lune":"","septime":"14:00","vaisseau":"","mosuke":"13:00","chakaiseiki akiyoshi":"","pilgrim":"","alan geaam":"13:30","l'archeste":"13:00","don juan ii":"","geoélia":"","la grande cascade":"","nomicos":"","ōrtensia":"","pages":"","substance":"","zostera":"","agapé":"","anona":"13:45","le faham":"","frédéric simonin":"13:45","jacques faussat":"","mallory gabsi":"13:30","oxte":"13:45","sushi shunei":""},"src":{"arpège":"Zenchef","le pré catelan":"Guestonline","l'ambroisie":"Zenchef","taillevent":"TheFork","le grand restaurant – jean-françois piège":"TheFork","maison rostang":"TheFork","david toutain":"TheFork","marsan par hélène darroze":"TheFork","table – bruno verjus":"Zenchef","l'oiseau blanc":"SevenRooms","alliance":"TheFork","apicius":"SevenRooms","granite":"TheFork","sushi b":"TheFork","anne":"Zenchef","datil":"Zenchef","le sergent recruteur":"Zenchef","at":"Zenchef","quinsou":"Zenchef","yoshinori":"Zenchef","auguste":"TheFork","nakatani":"TheFork","prévelle":"Zenchef","tomy & co":"Zenchef","contraste":"TheFork","irwin":"TheFork","origines restaurant":"Zenchef","pavyllon paris":"Zenchef","trente-trois":"Zenchef","septime":"Zenchef","mosuke":"Zenchef","alan geaam":"Zenchef","l'archeste":"Zenchef","anona":"TheFork","frédéric simonin":"Zenchef","mallory gabsi":"Zenchef","oxte":"Zenchef"}};
+  const BOOK = DATA.book, SRC = DATA.src;
+  let bookF = "";
+
+  const css = document.createElement("style");
+  css.textContent = `
+#flunchw { display: none; }
+html[data-city="paris"] #flunchw { display: block; }
+.booklast { display: none; }
+main.compact .card:not(.open) .booklast {
+  display: inline; flex: none; margin-left: 4px;
+  font-size: 10px; font-weight: 650; font-style: normal;
+  color: var(--muted); letter-spacing: 0;
+}
+main.compact .card:not(.open)[data-book-last^="13:45"] .booklast,
+main.compact .card:not(.open)[data-book-last^="14"] .booklast { color: var(--gold); }
+main.compact .card.open .kv[data-k="book"] { order: 5; }
+`;
+  document.head.appendChild(css);
+
+  const meal = document.querySelector("#fmeal") && document.querySelector("#fmeal").closest(".fg");
+  if (meal && !document.querySelector("#flunchw")) {
+    meal.insertAdjacentHTML("afterend",
+      '<div class="fg" id="flunchw"><span class="lbl">订位末席</span>'
+      + '<div class="chips" id="flunch">'
+      + '<button type="button" data-book="" class="on">不限</button>'
+      + '<button type="button" data-book="1345">13:45+</button>'
+      + '<button type="button" data-book="1400">14:00</button>'
+      + '<button type="button" data-book="ok">已核</button>'
+      + '<button type="button" data-book="none">无格子</button>'
+      + '</div></div>');
+  }
+  const lunchEl = document.querySelector("#flunch");
+
+  function setOn(val) {
+    if (!lunchEl) return;
+    lunchEl.querySelectorAll(":scope > button").forEach(b => {
+      b.classList.toggle("on", (b.dataset.book || "") === val);
+    });
+  }
+
+  const paris = document.getElementById("city-paris");
+  if (paris) {
+    paris.querySelectorAll(".card[data-name]").forEach(c => {
+      const name = c.dataset.name;
+      if (!(name in BOOK)) return;
+      const last = BOOK[name];
+      c.dataset.bookLast = last;
+      const h3 = c.querySelector("header h3");
+      if (h3 && last && !h3.querySelector(".booklast")) {
+        const b = document.createElement("b");
+        b.className = "booklast";
+        b.textContent = last;
+        h3.appendChild(b);
+      }
+      if (c.querySelector('.kv[data-k="book"]')) return;
+      const kv = document.createElement("div");
+      kv.className = "kv";
+      kv.dataset.k = "book";
+      const lab = last ? (last + (SRC[name] ? " · " + SRC[name] : "")) : "无公开格子";
+      kv.innerHTML = "<span>订位</span><b>" + lab + "</b>";
+      const hours = [...c.querySelectorAll(":scope > .kv")].find(el => (el.querySelector("span") || {}).textContent === "营业");
+      if (hours) hours.after(kv);
+      else c.querySelector("nav")?.before(kv);
+    });
+  }
+
+  window.mfLunchHit = function (c) {
+    if (!bookF) return true;
+    if (document.documentElement.dataset.city !== "paris") return true;
+    if (c.classList.contains("see")) return true;
+    const last = c.dataset.bookLast;
+    const known = Object.prototype.hasOwnProperty.call(c.dataset, "bookLast");
+    if (bookF === "1345") return !!(last && last >= "13:45");
+    if (bookF === "1400") return !!(last && last >= "14:00");
+    if (bookF === "ok") return !!last;
+    if (bookF === "none") return known && !last;
+    return true;
+  };
+  window.mfLunchOn = () => !!bookF;
+
+  if (lunchEl) {
+    lunchEl.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b || !lunchEl.contains(b)) return;
+      bookF = b.dataset.book || "";
+      setOn(bookF);
+      try { localStorage.setItem("mf-lunch", bookF); } catch {}
+      if (typeof apply === "function") apply();
+    });
+  }
+  const freset = document.querySelector("#freset");
+  if (freset) freset.addEventListener("click", () => {
+    bookF = "";
+    setOn("");
+    try { localStorage.removeItem("mf-lunch"); } catch {}
+  }, true);
+
+  try { bookF = localStorage.getItem("mf-lunch") || ""; } catch {}
+  if (bookF) {
+    setOn(bookF);
+    if (typeof apply === "function") apply();
+  }
+})();
+
+</script>
+<script>
+(() => {
   const sortEl = document.querySelector("#sort");
   const countEl = document.querySelector(".count");
   if (!sortEl) return;
@@ -4105,7 +4215,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=119", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=120", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
