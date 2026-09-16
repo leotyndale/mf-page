@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="121">
+<html lang="zh-CN" data-city="paris" data-ver="122">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v121</title>
+<title>工作笔记 v122</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v121</b>
+      <b class="ver" id="mfver">v122</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -3699,7 +3699,7 @@ main.compact .card.open .mwhen { display: none !important; }
   stampMeta();
 
   function inTitle(card, e) {
-    if (e.target.closest("a, button, .mine, .mwhen, .kv, nav, .mwhy, .mmemo")) return false;
+    if (e.target.closest("a, button, .mine, .mwhen, .kv, nav, .mwhy, .mmemo, .booklast")) return false;
     const head = card.querySelector(":scope > header");
     const loc = card.querySelector(":scope > .loc");
     const botEl = loc || head;
@@ -3740,7 +3740,7 @@ main.compact .card.open .mwhen { display: none !important; }
     pressEl = null;
   }
   function canPress(card, e) {
-    if (e.target.closest("a, button, .mine, .mwhen, .kv, nav, .mwhy, .mmemo, input, textarea")) return false;
+    if (e.target.closest("a, button, .mine, .mwhen, .kv, nav, .mwhy, .mmemo, input, textarea, .booklast")) return false;
     return !card.classList.contains("open") || inTitle(card, e);
   }
   mainEl.addEventListener("pointerdown", e => {
@@ -3775,6 +3775,8 @@ main.compact .card.open .mwhen { display: none !important; }
   css.textContent = `
 #flunchw { display: none; }
 html[data-city="paris"] #flunchw { display: block; }
+#medit { width: auto; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 2px; letter-spacing: .06em; }
+#medit.hot { background: var(--ink); color: #fff; border-color: var(--ink); }
 .booklast { display: none; }
 main.compact .card:not(.open) .booklast {
   display: inline; flex: none; margin-left: 4px;
@@ -3786,8 +3788,13 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
 .kv[data-k="book"] > b {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-weight: 650;
 }
+.kv[data-k="book"] .bedit { display: none; align-items: center; gap: 6px; }
+html[data-edit="1"] .kv[data-k="book"] .bedit,
+.card.editing .kv[data-k="book"] .bedit { display: flex; }
+html[data-edit="1"] .kv[data-k="book"] .bview,
+.card.editing .kv[data-k="book"] .bview { display: none; }
 .bbook {
-  width: 7.2em; height: 28px; padding: 0 8px; border: 0; border-radius: 8px;
+  width: 5.6em; height: 28px; padding: 0 8px; border: 0; border-radius: 8px;
   background: rgba(26,25,23,.04); font: inherit; font-size: 13px; font-weight: 650;
 }
 .bnone {
@@ -3832,6 +3839,35 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
   function pillText(last, stat) {
     return last || (stat === "todo" ? "填" : stat === "none" ? "无" : "");
   }
+  function viewText(name, last, stat) {
+    if (last) return last + (SRC[name] ? " · " + SRC[name] : "");
+    if (stat === "none") return "无格子";
+    return "点此填写末席";
+  }
+  function bindBook(c, kv) {
+    const inp = kv.querySelector(".bbook");
+    const noneB = kv.querySelector(".bnone");
+    if (!inp || inp.dataset.bound) return;
+    inp.dataset.bound = "1";
+    inp.addEventListener("click", e => e.stopPropagation());
+    inp.addEventListener("change", () => save(c, inp.value, false));
+    inp.addEventListener("keydown", e => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      inp.blur();
+    });
+    noneB.addEventListener("click", e => {
+      e.stopPropagation();
+      save(c, "", statOf(c.dataset.name) !== "none");
+    });
+  }
+  function enterEdit(c) {
+    c.classList.add("open", "editing");
+    const b = c.querySelector('.macts [data-edit="book"]');
+    if (b) b.classList.add("on");
+    const inp = c.querySelector(".bbook");
+    if (inp) inp.focus();
+  }
   function stamp(c) {
     const name = c.dataset.name;
     if (!(name in BOOK) && !(name in over)) return;
@@ -3856,29 +3892,44 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
       kv = document.createElement("div");
       kv.className = "kv";
       kv.dataset.k = "book";
-      kv.innerHTML = "<span>订位</span><b>"
-        + '<input class="bbook" type="time" step="900">'
-        + '<button type="button" class="bnone">无格子</button>'
-        + '<i class="bsrc"></i></b>';
       const hours = [...c.querySelectorAll(":scope > .kv")].find(el =>
         (el.querySelector("span") || {}).textContent === "营业");
       if (hours) hours.after(kv);
-      else c.querySelector("nav")?.before(kv);
-      const inp = kv.querySelector(".bbook");
-      const noneB = kv.querySelector(".bnone");
-      inp.addEventListener("click", e => e.stopPropagation());
-      inp.addEventListener("change", () => save(c, inp.value, false));
-      noneB.addEventListener("click", e => {
-        e.stopPropagation();
-        save(c, "", statOf(c.dataset.name) !== "none");
-      });
+      else {
+        const nav = c.querySelector("nav");
+        if (nav) nav.before(kv);
+        else c.appendChild(kv);
+      }
+    }
+    if (!kv.querySelector(".bview")) {
+      kv.innerHTML = "<span>订位</span><b>"
+        + '<span class="bview"></span>'
+        + '<span class="bedit">'
+        + '<input class="bbook" type="text" inputmode="numeric" placeholder="13:30" maxlength="5">'
+        + '<button type="button" class="bnone">无格子</button></span>'
+        + '<i class="bsrc"></i></b>';
+      bindBook(c, kv);
     }
     const inp = kv.querySelector(".bbook");
     const noneB = kv.querySelector(".bnone");
+    const view = kv.querySelector(".bview");
     const src = kv.querySelector(".bsrc");
+    if (view) view.textContent = viewText(name, last, stat);
     if (inp && document.activeElement !== inp) inp.value = last;
     if (noneB) noneB.classList.toggle("on", stat === "none");
-    if (src) src.textContent = SRC[name] ? SRC[name] : (stat === "todo" ? "核完填时段" : "");
+    if (src) src.textContent = "";
+    const acts = c.querySelector(".macts");
+    if (acts && !c.classList.contains("see") && !acts.querySelector('[data-edit="book"]')) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "mtrig";
+      b.dataset.edit = "book";
+      b.textContent = "编辑";
+      acts.appendChild(b);
+    }
+    const editB = c.querySelector('.macts [data-edit="book"]');
+    if (editB) editB.classList.toggle("on", c.classList.contains("editing")
+      || document.documentElement.dataset.edit === "1");
   }
   function stampAll() {
     if (!paris) return;
@@ -3889,9 +3940,11 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
     if (!name) return;
     if (none) over[name] = { last: "", ts: Date.now() };
     else {
-      const m = String(raw || "").trim().match(/^(\d{1,2}):(\d{2})$/);
+      const s = String(raw || "").trim().replace("：", ":");
+      const m = s.match(/^(\d{1,2}):(\d{2})$/)
+        || (s.match(/^(\d{3,4})$/) && [0, s.slice(0, -2), s.slice(-2)]);
       const last = m && +m[1] < 24 && +m[2] < 60
-        ? String(+m[1]).padStart(2, "0") + ":" + m[2] : "";
+        ? String(+m[1]).padStart(2, "0") + ":" + String(+m[2]).padStart(2, "0") : "";
       if (last) over[name] = { last, ts: Date.now() };
       else delete over[name];
     }
@@ -3919,6 +3972,50 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
     if (!lunchEl) return;
     lunchEl.querySelectorAll(":scope > button").forEach(b => {
       b.classList.toggle("on", (b.dataset.book || "") === val);
+    });
+  }
+
+  const _apply = window.apply;
+  if (typeof _apply === "function") {
+    window.apply = function () {
+      _apply();
+      stampAll();
+    };
+  }
+
+  const vtog = document.querySelector("#vtog");
+  if (vtog && !document.querySelector("#medit")) {
+    vtog.insertAdjacentHTML("afterend",
+      '<button type="button" class="vtog" id="medit">编辑</button>');
+  }
+  const medit = document.querySelector("#medit");
+  function setEdit(on) {
+    if (on) document.documentElement.dataset.edit = "1";
+    else delete document.documentElement.dataset.edit;
+    if (medit) medit.classList.toggle("hot", on);
+    if (!on && paris) paris.querySelectorAll(".card.editing").forEach(c => c.classList.remove("editing"));
+    stampAll();
+  }
+  if (medit) medit.onclick = () => setEdit(document.documentElement.dataset.edit !== "1");
+
+  if (paris) {
+    paris.addEventListener("click", e => {
+      const editB = e.target.closest('[data-edit="book"]');
+      if (editB) {
+        e.stopPropagation();
+        const c = editB.closest(".card");
+        if (!c) return;
+        if (c.classList.contains("editing")) {
+          c.classList.remove("editing");
+          editB.classList.remove("on");
+        } else enterEdit(c);
+        return;
+      }
+      if (e.target.closest(".bbook, .bnone")) return;
+      const hit = e.target.closest(".booklast, .bview");
+      if (!hit) return;
+      const c = hit.closest(".card");
+      if (c) enterEdit(c);
     });
   }
 
@@ -4322,7 +4419,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=121", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=122", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
