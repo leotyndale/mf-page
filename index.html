@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="140">
+<html lang="zh-CN" data-city="paris" data-ver="142">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v140</title>
+<title>工作笔记 v142</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -748,13 +748,12 @@ button:active { transform: scale(.97); }
 .ftog.hot, .ftog.open { background: var(--mic); color: #fff; border-color: var(--mic); }
 
 /* ── Filter dropdown (anchored under #ftog, overlays search) ── */
-.panel-overlay { position: fixed; inset: 0; z-index: 1013; background: rgba(20,17,15,.36);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+.panel-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(20,17,15,.28);
   opacity: 0; pointer-events: none; transition: opacity var(--t) var(--ease); }
 .panel-overlay.on { opacity: 1; pointer-events: auto; }
 .panel { position: absolute; left: var(--pad); right: var(--pad);
   top: calc(max(0px, env(safe-area-inset-top)) + 90px);
-  z-index: 1014; background: var(--card); border-radius: 4px;
+  z-index: 20; background: var(--card); border-radius: 4px;
   padding: 12px; max-height: min(78vh, 560px); overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 18px 40px rgba(20,17,15,.16);
@@ -1124,7 +1123,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v140</b>
+      <b class="ver" id="mfver">v142</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -4795,7 +4794,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=140", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=142", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
