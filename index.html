@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="137">
+<html lang="zh-CN" data-city="paris" data-ver="138">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v137</title>
+<title>工作笔记 v138</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -901,6 +901,20 @@ body.maplock header.top { z-index: 2100; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+/* Header tabs set `transform: none`, which cancelled the only press feedback the
+   app had (button:active { scale(.97) }), so tapping a city or star felt dead.
+   Give them their own response instead of a transform. */
+.cities button:active, .boxes button:active, .tabs button:active,
+.sortbar button:active { color: var(--ink); background: rgba(143,22,38,.07); }
+.tabs button { transition: color var(--t) var(--ease), background .12s var(--ease),
+  border-color var(--t) var(--ease); }
+.cities button, .boxes button, .sortbar button {
+  transition: color var(--t) var(--ease), background .12s var(--ease); }
+/* 32px and 34px controls get a 44px hit area without growing visually. */
+.ftog, .ccy, #vtog, .mtrig { position: relative; touch-action: manipulation; }
+.ftog::after, .ccy::after, #vtog::after, .mtrig::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
 .ver { flex: none; margin: 0 auto 0 0; font-size: 11px; font-weight: 650; color: var(--muted); letter-spacing: .04em; }
 .mapwrap { height: clamp(180px, 46vw, 300px); }
 #msheet.mapsheet { left: 8px; right: 8px; bottom: 8px; max-height: none;
@@ -1106,7 +1120,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v137</b>
+      <b class="ver" id="mfver">v138</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -3874,7 +3888,8 @@ main.compact .card {
 main.compact .card.want { background: #f7efe6; }
 main.compact .card.skip { background: #ebe6df; }
 main.compact .card.press {
-  box-shadow: inset 0 0 0 999px rgba(70, 45, 15, .08);
+  /* The old 8% wash was effectively invisible; a press has to be felt. */
+  box-shadow: inset 0 0 0 999px rgba(143, 22, 38, .10);
 }
 main.compact .card:not(.open).press { transform: scale(.988); }
 main.compact .card.open {
@@ -4200,9 +4215,13 @@ main.compact .card.open .mwhen { display: none !important; }
   mainEl.addEventListener("pointermove", e => {
     if (!pressEl) return;
     const dx = e.clientX - pressX, dy = e.clientY - pressY;
-    if (dx * dx + dy * dy > 64) dropPress();
-  });
+    // 12px, not 8: a normal thumb tap drifts more than 8px and the press was
+    // being cancelled before the tap even registered.
+    if (dx * dx + dy * dy > 144) dropPress();
+  }, { passive: true });
   mainEl.addEventListener("pointercancel", dropPress);
+  // Without pointerup the highlight stuck on any tap that did not end in a click.
+  mainEl.addEventListener("pointerup", () => { setTimeout(dropPress, 90); }, { passive: true });
 })();
 
 </script>
@@ -4773,7 +4792,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=137", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=138", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
