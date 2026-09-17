@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="165">
+<html lang="zh-CN" data-city="paris" data-ver="166">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v165</title>
+<title>工作笔记 v166</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -993,7 +993,7 @@ html[data-star="plan"] #sort { display: none; }
 #fpanel .chips button::after { content: none; }
 #fpanel #fdays { flex-wrap: nowrap; }
 #fpanel .tools {
-  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 0 0 8px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0 0 8px;
 }
 #fpanel select {
   width: 100%; height: 28px; padding: 0 20px 0 8px; margin: 0;
@@ -1118,6 +1118,18 @@ main.compact .card:not(.open) h3 .zh { display: none; }
         <option value="peninsula">半岛</option>
         <option value="other">其他酒店</option>
       </select>
+      <select id="fextra">
+        <option value="">榜单不限</option>
+        <option value="old">老字号</option>
+        <option value="dianping">点评</option>
+        <option value="best">50佳</option>
+        <option value="steak">牛排咖啡</option>
+        <option value="pizza">披萨</option>
+        <option value="burger">汉堡</option>
+        <option value="bar">酒吧</option>
+        <option value="vegan">素食</option>
+        <option value="sweet">咖啡烘焙</option>
+      </select>
     </div>
     <div class="fg">
       <span class="lbl">单点</span>
@@ -1127,32 +1139,10 @@ main.compact .card:not(.open) h3 .zh { display: none; }
         <button type="button" data-carte="no">无</button>
       </div>
     </div>
-    <div id="fextra">
-      <div class="fg">
-        <span class="lbl">榜单</span>
-        <div class="chips">
-          <button type="button" data-extra="" class="on">不限</button>
-          <button type="button" data-extra="old">老字号</button>
-          <button type="button" data-extra="dianping">点评</button>
-          <button type="button" data-extra="best">50佳</button>
-        </div>
-      </div>
-      <div class="fg">
-        <span class="lbl">菜式</span>
-        <div class="chips">
-          <button type="button" data-extra="steak">牛排咖啡</button>
-          <button type="button" data-extra="pizza">披萨</button>
-          <button type="button" data-extra="burger">汉堡</button>
-          <button type="button" data-extra="bar">酒吧</button>
-          <button type="button" data-extra="vegan">素食</button>
-          <button type="button" data-extra="sweet">咖啡烘焙</button>
-        </div>
-      </div>
-    </div>
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v165</b>
+      <b class="ver" id="mfver">v166</b>
     </div>
   </div>
 </header>
@@ -2034,7 +2024,7 @@ function splitMeals(list, bySort) {
 }
 function apply() {
   document.documentElement.dataset.star = star;
-  extraF = chipVal(extraEl, "extra");
+  extraF = extraEl ? extraEl.value : "";
   document.documentElement.dataset.extra = extraF;
   if (seeing()) {
     pane().querySelectorAll(":scope > .parkh, :scope > .mealh").forEach(h => h.classList.add("hide"));
@@ -2227,7 +2217,7 @@ function restoreUi(forCity, global) {
     setChip(slotEl, "slot", ui.slot || "");
     slotF = chipVal(slotEl, "slot");
     setChip(carteEl, "carte", ui.carte || "");
-    setChip(extraEl, "extra", extraF);
+    pickOpt(extraEl, extraF);
     if (ui.q) q.value = ui.q;
     if (ui.ccy === "eur" || ui.ccy === "cny") ccy = ui.ccy;
     if (ui.poi) Object.assign(poiOn, { stay: !!ui.poi.stay, ride: !!ui.poi.ride, see: !!ui.poi.see });
@@ -2381,7 +2371,7 @@ if (hotelEl) hotelEl.onchange = apply;
 if (arrEl) arrEl.onchange = apply;
 if (cuiEl) cuiEl.onchange = apply;
 bindChips(carteEl, "carte", () => apply());
-bindChips(extraEl, "extra", v => { extraF = v; mapTouched = false; show(); });
+if (extraEl) extraEl.onchange = () => { extraF = extraEl.value; mapTouched = false; show(); };
 const freset = document.querySelector("#freset");
 if (freset) freset.onclick = () => {
   dayF = mealF = hotelF = slotF = "";
@@ -2390,13 +2380,13 @@ if (freset) freset.onclick = () => {
   if (arrEl) arrEl.value = "";
   if (cuiEl) cuiEl.value = "";
   if (hotelEl) hotelEl.value = "";
+  if (extraEl) extraEl.value = "";
   extraF = "";
   dayBtns.forEach(b => b.classList.toggle("on", !(b.dataset.day || "")));
   setChip(statEl, "stat", "active,lost");
   setChip(mealEl, "meal", "");
   setChip(carteEl, "carte", "");
   setChip(slotEl, "slot", "");
-  setChip(extraEl, "extra", "");
   syncBfHint();
   apply();
 };
@@ -3933,10 +3923,13 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
     return new Set(COLS.map(c => c[0]));
   }
   let shown = loadCols();
+  const MAPK = "mf-map";
+  let mapOn = localStorage.getItem(MAPK) !== "0";
   if (sortEl && !document.querySelector("#cpanel")) {
     sortEl.insertAdjacentHTML("afterend",
       '<div class="cpanel" id="cpanel">'
       + COLS.map(c => '<button type="button" data-col="' + c[0] + '">' + c[2] + "</button>").join("")
+      + '<button type="button" data-map>地图</button>'
       + "</div>");
   }
   const cpanel = document.querySelector("#cpanel");
@@ -3981,6 +3974,7 @@ html[data-hide~="rev"] .sortbar [data-sort="rev"],
 html[data-hide~="rev"] main.compact .card .mrev,
 html[data-hide~="price"] .sortbar [data-sort="price"] { display: none !important; }
 html[data-hide~="price"] main.compact .card::after { content: none; display: none; }
+html[data-hide~="map"] .mapwrap { display: none !important; }
 main.compact .card {
   display: grid;
   grid-template-columns: var(--mf-cols, 36px minmax(0,1fr) minmax(0,56px) minmax(0,36px) minmax(0,28px) minmax(0,40px) minmax(0,48px));
@@ -4196,8 +4190,14 @@ main.compact .card.open .mwhen { display: none !important; }
       const i = vis.findIndex(v => v[0] === c[0]);
       root.style.setProperty("--col-" + c[0], String(i < 0 ? 3 : i + 3));
     });
-    root.setAttribute("data-hide", COLS.filter(c => !shown.has(c[0])).map(c => c[0]).join(" "));
-    if (cpanel) cpanel.querySelectorAll("[data-col]").forEach(b => b.classList.toggle("on", shown.has(b.dataset.col)));
+    const hide = COLS.filter(c => !shown.has(c[0])).map(c => c[0]);
+    if (!mapOn) hide.push("map");
+    root.setAttribute("data-hide", hide.join(" "));
+    if (cpanel) {
+      cpanel.querySelectorAll("[data-col]").forEach(b => b.classList.toggle("on", shown.has(b.dataset.col)));
+      const mb = cpanel.querySelector("[data-map]");
+      if (mb) mb.classList.toggle("on", mapOn);
+    }
   }
   applyCols();
   function setColsOpen(on) {
@@ -4209,9 +4209,15 @@ main.compact .card.open .mwhen { display: none !important; }
     setColsOpen(!ctog.classList.contains("hot"));
   };
   if (cpanel) cpanel.addEventListener("click", e => {
-    const b = e.target.closest("[data-col]");
+    const b = e.target.closest("[data-col], [data-map]");
     if (!b) return;
     e.stopPropagation();
+    if (b.hasAttribute("data-map")) {
+      mapOn = !mapOn;
+      localStorage.setItem(MAPK, mapOn ? "1" : "0");
+      applyCols();
+      return;
+    }
     const id = b.dataset.col;
     if (shown.has(id)) shown.delete(id);
     else shown.add(id);
@@ -4949,7 +4955,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=165", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=166", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
