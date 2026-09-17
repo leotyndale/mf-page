@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="125">
+<html lang="zh-CN" data-city="paris" data-ver="126">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v125</title>
+<title>工作笔记 v126</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v125</b>
+      <b class="ver" id="mfver">v126</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -2524,9 +2524,8 @@ setCity(city, true);
       }
       dEl.textContent = d < 1 ? Math.round(d * 1000) + " m"
         : d < 10 ? d.toFixed(1) + " km"
-        : d < 80 ? Math.round(d) + " km"
-        : "—";
-    } else if (dEl) dEl.remove();
+        : Math.round(d) + " km";
+    } else if (dEl) dEl.textContent = "—";
   }
   function paintAll() {
     paneCards().forEach(stampTags);
@@ -2554,23 +2553,31 @@ setCity(city, true);
     paintVisible();
   };
   function askHere() {
-    if (locating || here) return;
+    if (locating) return;
     if (!navigator.geolocation) { st("无定位"); return; }
     locating = true;
     st("定位中…");
-    navigator.geolocation.getCurrentPosition(p => {
+    const ok = p => {
       here = [p.coords.latitude, p.coords.longitude];
       localStorage.setItem(HK, JSON.stringify(here));
       locating = false;
       st("");
       window.apply();
-    }, () => { locating = false; st("定位失败"); },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 600000 });
+    };
+    const fail = () => {
+      locating = false;
+      st(here ? "" : "定位失败，再点距离");
+    };
+    navigator.geolocation.getCurrentPosition(ok, () => {
+      navigator.geolocation.getCurrentPosition(ok, fail, {
+        enableHighAccuracy: false, timeout: 20000, maximumAge: 300000
+      });
+    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
   }
   if (sortEl) {
     sortEl.addEventListener("click", e => {
       const b = e.target.closest("button");
-      if (b && b.dataset.sort === "dist" && !here) askHere();
+      if (b && b.dataset.sort === "dist") askHere();
     }, true);
   }
   const qEl = document.querySelector(".search");
@@ -2956,8 +2963,12 @@ setCity(city, true);
 
   paintAll();
   if (typeof window.apply === "function") window.apply();
+  askHere();
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") sync();
+    if (document.visibilityState === "visible") {
+      askHere();
+      sync();
+    }
   });
   ghCallback().then(hit => { if (!hit) sync(); });
   window.mfPaintCard = paint;
@@ -4163,7 +4174,7 @@ main.compact .card.see:not(.open) .kv[data-k="bio"] > b {
         + r.rows.map(row => '<div class="mline"><i>' + row[0] + "</i><b>" + row[1] + "</b><span>" + row[2] + "</span>"
           + '<div class="mbar"><i style="width:' + row[1] + '%"></i></div></div>').join("") + "</div>";
       const dlab = loc && dist < 900000
-        ? (dist < 1 ? Math.round(dist * 1000) + " m" : dist < 10 ? dist.toFixed(1) + " km" : dist < 80 ? Math.round(dist) + " km" : "—")
+        ? (dist < 1 ? Math.round(dist * 1000) + " m" : dist < 10 ? dist.toFixed(1) + " km" : Math.round(dist) + " km")
         : "—";
       return '<article class="card see' + (opened.has(p.name) ? " open" : "") + '" data-now="' + (g || "0")
         + '" data-name="' + esc(p.name) + '" data-price="' + x.eur + '" data-p="' + esc(feeShow(p))
@@ -4334,7 +4345,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=125", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=126", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
