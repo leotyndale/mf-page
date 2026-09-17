@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="127">
+<html lang="zh-CN" data-city="paris" data-ver="128">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v127</title>
+<title>工作笔记 v128</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v127</b>
+      <b class="ver" id="mfver">v128</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -3819,7 +3819,6 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
       + '</div></div>');
   }
   const lunchEl = document.querySelector("#flunch");
-  const paris = document.getElementById("city-paris");
 
   function persistOver() {
     try { localStorage.setItem(BK, JSON.stringify(over)); } catch {}
@@ -3833,7 +3832,9 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
     const name = c.dataset.name;
     if (name in over) return over[name].last ? "ok" : "none";
     if (c.dataset.bookLast) return "ok";
-    return c.dataset.bookStat || "";
+    if (c.dataset.bookStat) return c.dataset.bookStat;
+    if (c.dataset.meal === "lunch" || c.dataset.meal === "dinner") return "todo";
+    return "";
   }
   function isLunchLast(last) {
     return !!(last && last >= "13:30" && last < "17:00");
@@ -3841,10 +3842,24 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
   function pillText(last, stat) {
     return last || (stat === "todo" ? "填" : stat === "none" ? "无" : "");
   }
+  function bindBook(c, kv) {
+    const inp = kv.querySelector(".bbook");
+    const noneB = kv.querySelector(".bnone");
+    if (!inp || inp.dataset.bound) return;
+    inp.dataset.bound = "1";
+    inp.addEventListener("click", e => e.stopPropagation());
+    inp.addEventListener("change", () => save(c, inp.value, false));
+    noneB.addEventListener("click", e => {
+      e.stopPropagation();
+      save(c, "", statOf(c) !== "none");
+    });
+  }
   function stamp(c) {
+    if (c.classList.contains("see")) return;
     const stat = statOf(c);
     if (!stat && !(c.dataset.name in over)) return;
     const last = lastOf(c);
+    const dinner = c.dataset.meal === "dinner";
     c.dataset.bookLast = last;
     c.dataset.bookStat = stat;
     const h3 = c.querySelector("header h3");
@@ -3856,50 +3871,41 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
         pill.className = "booklast";
         h3.appendChild(pill);
       }
-      pill.textContent = last && last < "17:00" ? last : txt;
-      pill.classList.toggle("late", isLunchLast(last));
+      pill.textContent = txt;
+      pill.classList.toggle("late", dinner ? last >= "21:00" : isLunchLast(last));
     } else if (pill) pill.remove();
     let kv = c.querySelector('.kv[data-k="book"]')
       || [...c.querySelectorAll(":scope > .kv")].find(el =>
         (el.querySelector("span") || {}).textContent === "订位");
-    if (stat === "todo") {
-      if (!kv) {
-        kv = document.createElement("div");
-        kv.className = "kv";
-        kv.dataset.k = "book";
-        const hours = [...c.querySelectorAll(":scope > .kv")].find(el =>
-          (el.querySelector("span") || {}).textContent === "营业");
-        if (hours) hours.after(kv);
-        else {
-          const nav = c.querySelector("nav");
-          if (nav) nav.before(kv);
-          else c.appendChild(kv);
-        }
+    if (!kv) {
+      kv = document.createElement("div");
+      kv.className = "kv";
+      kv.dataset.k = "book";
+      const hours = [...c.querySelectorAll(":scope > .kv")].find(el =>
+        (el.querySelector("span") || {}).textContent === "营业");
+      if (hours) hours.after(kv);
+      else {
+        const nav = c.querySelector("nav");
+        if (nav) nav.before(kv);
+        else c.appendChild(kv);
       }
-      if (!kv.querySelector(".bbook")) {
-        kv.innerHTML = "<span>订位</span><b>"
-          + '<input class="bbook" type="text" inputmode="numeric" placeholder="13:30" maxlength="5">'
-          + '<button type="button" class="bnone">无格子</button></b>';
-        const inp = kv.querySelector(".bbook");
-        const noneB = kv.querySelector(".bnone");
-        inp.addEventListener("click", e => e.stopPropagation());
-        inp.addEventListener("change", () => save(c, inp.value, false));
-        noneB.addEventListener("click", e => {
-          e.stopPropagation();
-          save(c, "", true);
-        });
-      }
-      const inp = kv.querySelector(".bbook");
-      if (inp && document.activeElement !== inp) inp.value = last;
-      return;
     }
-    if (!kv) return;
-    const b = kv.querySelector("b");
-    if (b && !b.querySelector(".bbook")) b.textContent = last || "无格子";
+    if (!kv.querySelector(".bbook")) {
+      kv.innerHTML = "<span>订位</span><b>"
+        + '<input class="bbook" type="text" inputmode="numeric" maxlength="5">'
+        + '<button type="button" class="bnone">无格子</button></b>';
+      bindBook(c, kv);
+    }
+    const inp = kv.querySelector(".bbook");
+    const noneB = kv.querySelector(".bnone");
+    if (inp) {
+      inp.placeholder = dinner ? "21:00" : "13:30";
+      if (document.activeElement !== inp) inp.value = last;
+    }
+    if (noneB) noneB.classList.toggle("on", stat === "none");
   }
   function stampAll() {
-    if (!paris) return;
-    paris.querySelectorAll(".card[data-name]").forEach(stamp);
+    document.querySelectorAll(".citypane .card[data-name]").forEach(stamp);
   }
   function save(c, raw, none) {
     const name = c.dataset.name;
@@ -3933,6 +3939,12 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
   }
   window.mfBookPack = () => over;
   window.mfBookMerge = mergeBook;
+
+  const _apply = window.apply;
+  if (typeof _apply === "function") window.apply = function () {
+    _apply();
+    stampAll();
+  };
 
   function setOn(val) {
     if (!lunchEl) return;
@@ -4341,7 +4353,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=127", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=128", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
