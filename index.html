@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="162">
+<html lang="zh-CN" data-city="paris" data-ver="163">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v162</title>
+<title>工作笔记 v163</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1154,7 +1154,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v162</b>
+      <b class="ver" id="mfver">v163</b>
     </div>
   </div>
 </header>
@@ -2436,9 +2436,9 @@ function pingPin(c) {
   if (!c || !c.dataset.lat) return;
   litKey = pinKey(c.dataset.name, c.dataset.lat);
   applyLit();
-  if (!map) return;
+  if (!map || !mapFull) return;
   ignoreMove = true;
-  map.setView([+c.dataset.lat, +c.dataset.lng], Math.max(map.getZoom(), mapFull ? 14 : 13));
+  map.setView([+c.dataset.lat, +c.dataset.lng], Math.max(map.getZoom(), 14));
   setTimeout(() => { ignoreMove = false; }, 280);
 }
 window.mfPingPin = pingPin;
@@ -3991,7 +3991,7 @@ main.compact .card {
   background: transparent; border: 0; border-bottom: 1px solid var(--line);
   border-radius: 0; box-shadow: none; cursor: pointer;
   touch-action: pan-y;
-  content-visibility: auto; contain: content; contain-intrinsic-size: 44px;
+  content-visibility: auto; contain-intrinsic-size: 44px;
 }
 main.compact .card.want { background: var(--want); }
 main.compact .card.skip { background: var(--skip); }
@@ -4002,14 +4002,14 @@ main.compact .card.open {
   background: var(--card); border: 1px solid var(--line);
   border-radius: var(--radius); box-shadow: none;
   margin: 6px 0; padding: 12px var(--pad);
-  content-visibility: visible; contain: none; contain-intrinsic-size: unset;
+  content-visibility: visible; contain-intrinsic-size: unset;
 }
 main.compact button { transition: background .12s var(--ease); }
 main.compact button:active { background: var(--wash); }
 main.compact .card.open.want { background: var(--want); }
 main.compact .card header {
   grid-column: 1 / 3; grid-row: 1; display: flex; align-items: center;
-  gap: 5px; overflow: hidden; flex-wrap: nowrap; min-width: 0;
+  gap: 5px; overflow: visible; flex-wrap: nowrap; min-width: 0;
 }
 main.compact .card .starbox { flex: none; font-size: 10px; line-height: 1.2; }
 main.compact .card .starbox .peak,
@@ -4054,7 +4054,7 @@ main.compact .card .starbox .peak::after {
 }
 main.compact .card h3 {
   display: flex; flex-wrap: nowrap; align-items: baseline; gap: 0 6px;
-  font-size: 13px; font-weight: 500; line-height: 1.25;
+  font-size: 13px; font-weight: 500; line-height: 1.3;
   min-width: 0; flex: 1; overflow: hidden; white-space: nowrap;
 }
 main.compact .card:not(.open) h3 .mfname {
@@ -4063,11 +4063,11 @@ main.compact .card:not(.open) h3 .mfname {
 }
 main.compact .card h3 a,
 main.compact .card .loc a { pointer-events: none; text-decoration: none; color: inherit; }
-main.compact .card:not(.open) h3 .mbest { order: 2; }
-main.compact .card:not(.open) h3 .booklast { order: 3; }
+main.compact .card:not(.open) h3 .mbest { order: 2; flex-shrink: 0; }
+main.compact .card:not(.open) h3 .booklast { order: 3; flex-shrink: 0; }
 main.compact .card:not(.open) h3 .zh {
   display: inline !important; order: 4; flex: none;
-  font-size: 11px; font-style: normal; font-weight: 400;
+  font-size: 11px; font-style: normal; font-weight: 400; line-height: 1.3;
   color: var(--muted); margin-left: 0;
 }
 main.compact .card.open h3 {
@@ -4325,7 +4325,6 @@ main.compact .card.open .mwhen { display: none !important; }
   }
   mainEl.addEventListener("click", e => {
     const card = e.target.closest(".card");
-    if (card && typeof mfPingPin === "function") mfPingPin(card);
     if (!mainEl.classList.contains("compact")) return;
     if (!card) return;
     if (card.classList.contains("open")) {
@@ -4345,6 +4344,7 @@ main.compact .card.open .mwhen { display: none !important; }
       mainEl.querySelectorAll(".card.open").forEach(closeCard);
       card.classList.add("open");
       dropPress();
+      requestAnimationFrame(() => { if (typeof mfPingPin === "function") mfPingPin(card); });
     };
     if (card.classList.contains("press")) requestAnimationFrame(open);
     else open();
@@ -4359,10 +4359,8 @@ main.compact .card.open .mwhen { display: none !important; }
     return !card.classList.contains("open") || inTitle(card, e);
   }
   mainEl.addEventListener("pointerdown", e => {
-    const card0 = e.target.closest(".card");
-    if (card0 && typeof mfPingPin === "function") mfPingPin(card0);
     if (!mainEl.classList.contains("compact")) return;
-    const card = card0;
+    const card = e.target.closest(".card");
     if (!card || !canPress(card, e)) return;
     dropPress();
     pressEl = card;
@@ -4952,7 +4950,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=162", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=163", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
