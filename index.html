@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="164">
+<html lang="zh-CN" data-city="paris" data-ver="165">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v164</title>
+<title>工作笔记 v165</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1152,7 +1152,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v164</b>
+      <b class="ver" id="mfver">v165</b>
     </div>
   </div>
 </header>
@@ -3917,7 +3917,7 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
   const ctog = document.querySelector("#ctog");
   const sortEl = document.querySelector("#sort");
   const COLS = [
-    ["dist", "44px", "距离"],
+    ["dist", "56px", "距离"],
     ["age", "36px", "店龄"],
     ["go", "28px", "值得"],
     ["rev", "40px", "评论"],
@@ -3948,7 +3948,7 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
   letter-spacing: .02em; }
 #vtog.hot, #ctog.hot { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 #sort.sortbar {
-  display: grid; grid-template-columns: var(--mf-cols, 36px minmax(0,1fr) minmax(0,44px) minmax(0,36px) minmax(0,28px) minmax(0,40px) minmax(0,48px));
+  display: grid; grid-template-columns: var(--mf-cols, 36px minmax(0,1fr) minmax(0,56px) minmax(0,36px) minmax(0,28px) minmax(0,40px) minmax(0,48px));
   column-gap: 6px; align-items: center; padding: 2px var(--pad) 6px;
   min-width: 0;
 }
@@ -3983,7 +3983,7 @@ html[data-hide~="price"] .sortbar [data-sort="price"] { display: none !important
 html[data-hide~="price"] main.compact .card::after { content: none; display: none; }
 main.compact .card {
   display: grid;
-  grid-template-columns: var(--mf-cols, 36px minmax(0,1fr) minmax(0,44px) minmax(0,36px) minmax(0,28px) minmax(0,40px) minmax(0,48px));
+  grid-template-columns: var(--mf-cols, 36px minmax(0,1fr) minmax(0,56px) minmax(0,36px) minmax(0,28px) minmax(0,40px) minmax(0,48px));
   min-width: 0;
   align-items: center;
   padding: 6px var(--pad); margin-bottom: 0;
@@ -4058,17 +4058,17 @@ main.compact .card h3 {
 }
 main.compact .card:not(.open) h3 .mfname {
   display: block; order: 1; min-width: 0; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap; flex: 1 1 0;
+  text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto;
 }
 main.compact .card h3 a,
 main.compact .card .loc a { pointer-events: none; text-decoration: none; color: inherit; }
-main.compact .card:not(.open) h3 .mbest { order: 2; flex-shrink: 0; }
-main.compact .card:not(.open) h3 .booklast { order: 3; flex-shrink: 0; }
 main.compact .card:not(.open) h3 .zh {
-  display: inline !important; order: 4; flex: none;
+  display: inline !important; order: 2; flex: none;
   font-size: 11px; font-style: normal; font-weight: 400; line-height: 1.3;
   color: var(--muted); margin-left: 0;
 }
+main.compact .card:not(.open) h3 .mbest { order: 3; flex-shrink: 0; }
+main.compact .card:not(.open) h3 .booklast { order: 4; flex-shrink: 0; }
 main.compact .card.open h3 {
   overflow: visible; white-space: normal; flex-wrap: wrap;
   font-size: 14px; font-weight: 600; line-height: 1.3;
@@ -4100,7 +4100,7 @@ main.compact .card .mrev {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   font-variant-numeric: tabular-nums; text-align: right;
 }
-main.compact .card .mdist { grid-column: var(--col-dist); text-overflow: clip; }
+main.compact .card .mdist { grid-column: var(--col-dist); overflow: visible; text-overflow: unset; }
 main.compact .card .mage { grid-column: var(--col-age); }
 main.compact .card .mgo { grid-column: var(--col-go); }
 main.compact .card .mrev { grid-column: var(--col-rev); }
@@ -4949,7 +4949,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=164", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=165", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
