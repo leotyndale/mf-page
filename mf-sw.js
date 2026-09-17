@@ -1,7 +1,7 @@
-const K = "mf-11";
+const K = "mf-" + (new URL(self.location.href).searchParams.get("v") || "0");
 const TK = "mf-tiles";
 const TILE_MAX = 1500;
-const PRE = ["./index.html", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest"];
+const PRE = ["./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest"];
 
 self.addEventListener("install", e => {
   self.skipWaiting();
@@ -9,8 +9,11 @@ self.addEventListener("install", e => {
     const c = await caches.open(K);
     await Promise.all(PRE.map(u => c.add(u).catch(() => {})));
     try {
-      const r = await fetch("./mf-ver.txt", { cache: "no-store" });
-      if (r.ok) await c.put("./mf-ver", new Response((await r.text()).trim()));
+      const res = await pullPage();
+      if (!res.ok) return;
+      await putPage(c, res);
+      const v = await remoteVer();
+      if (v) await c.put("./mf-ver", new Response(v));
     } catch {}
   })());
 });
@@ -18,8 +21,12 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(x => x !== K && x !== TK).map(x => caches.delete(x)));
+    const old = keys.filter(x => x !== K && x !== TK);
+    await Promise.all(old.map(x => caches.delete(x)));
     await self.clients.claim();
+    if (!old.length) return;
+    const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    list.forEach(c => c.postMessage({ type: "mf-ver" }));
   })());
 });
 
@@ -31,7 +38,7 @@ self.addEventListener("fetch", e => {
     return;
   }
   if (isPage(e.request, url)) {
-    e.respondWith(page(e.request));
+    e.respondWith(page());
     return;
   }
   if (url.origin === location.origin) {
@@ -101,7 +108,7 @@ async function putPage(cache, res) {
 }
 
 async function remoteVer() {
-  const r = await fetch("./mf-ver.txt", { cache: "no-store" });
+  const r = await fetch(new URL("./mf-ver.txt", self.location.href).href, { cache: "no-store" });
   if (!r.ok) return "";
   return (await r.text()).trim();
 }
@@ -111,30 +118,32 @@ async function cachedVer(cache) {
   return hit ? (await hit.text()).trim() : "";
 }
 
-async function refreshIfNew(cache, req) {
-  try {
-    const remote = await remoteVer();
-    if (!remote) return;
-    const prev = await cachedVer(cache);
-    if (remote === prev) return;
-    const res = await fetch(req, { cache: "no-cache" });
-    if (!res.ok) return;
-    await putPage(cache, res);
-    await cache.put("./mf-ver", new Response(remote));
-    const list = await self.clients.matchAll({ type: "window" });
-    list.forEach(c => c.postMessage({ type: "mf-ver" }));
-  } catch {}
+async function pullPage() {
+  return fetch(new URL("./index.html", self.location.href).href, { cache: "no-store" });
 }
 
-async function page(req) {
+async function syncPage(cache) {
+  const remote = await remoteVer();
+  if (!remote) return null;
+  const prev = await cachedVer(cache);
+  if (remote === prev) return null;
+  const res = await pullPage();
+  if (!res.ok) return null;
+  await putPage(cache, res);
+  await cache.put("./mf-ver", new Response(remote));
+  return res;
+}
+
+async function page() {
   const cache = await caches.open(K);
-  const cached = await matchPage(cache);
-  if (cached) {
-    refreshIfNew(cache, req);
-    return cached;
-  }
   try {
-    const res = await fetch(req, { cache: "no-cache" });
+    const fresh = await syncPage(cache);
+    if (fresh) return fresh;
+  } catch {}
+  const cached = await matchPage(cache);
+  if (cached) return cached;
+  try {
+    const res = await pullPage();
     if (res.ok) {
       await putPage(cache, res);
       const v = await remoteVer();
