@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="169">
+<html lang="zh-CN" data-city="paris" data-ver="170">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v169</title>
+<title>工作笔记 v170</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1142,7 +1142,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v169</b>
+      <b class="ver" id="mfver">v170</b>
     </div>
   </div>
 </header>
@@ -3990,18 +3990,22 @@ main.compact .card {
 }
 main.compact .card.want { background: var(--want); transition: none; }
 main.compact .card.skip { background: var(--skip); }
-main.compact .card.press { background: var(--skip); }
-main.compact .card.press.want { background: var(--want); }
+main.compact .card.press,
 main.compact .card.open {
   background: var(--bg); border: 1px solid var(--line);
   border-radius: var(--radius); box-shadow: none;
   margin: 4px 0; padding: 10px var(--pad) 12px;
-  content-visibility: visible; contain-intrinsic-size: unset;
   transition: none;
+}
+main.compact .card.press.want,
+main.compact .card.open.want { background: var(--want); }
+main.compact .card.press.skip,
+main.compact .card.open.skip { background: var(--skip); }
+main.compact .card.open {
+  content-visibility: visible; contain-intrinsic-size: unset;
 }
 main.compact button { transition: background .12s var(--ease); }
 main.compact button:active { background: var(--wash); }
-main.compact .card.open.want { background: var(--want); }
 main.compact .card header {
   grid-column: 1 / 3; grid-row: 1; display: flex; align-items: center;
   gap: 5px; overflow: visible; flex-wrap: nowrap; min-width: 0;
@@ -4382,8 +4386,7 @@ main.compact .card.open .mwhen { display: none !important; }
     if (dx * dx + dy * dy > 144) dropPress();
   }, { passive: true });
   mainEl.addEventListener("pointercancel", dropPress);
-  // Without pointerup the highlight stuck on any tap that did not end in a click.
-  mainEl.addEventListener("pointerup", dropPress, { passive: true });
+  mainEl.addEventListener("pointerup", () => { setTimeout(dropPress, 160); }, { passive: true });
 })();
 
 </script>
@@ -4956,7 +4959,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=169", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=170", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
