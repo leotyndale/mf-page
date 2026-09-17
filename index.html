@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="138">
+<html lang="zh-CN" data-city="paris" data-ver="139">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v138</title>
+<title>工作笔记 v139</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -910,9 +910,12 @@ body.maplock header.top { z-index: 2100; }
   border-color var(--t) var(--ease); }
 .cities button, .boxes button, .sortbar button {
   transition: color var(--t) var(--ease), background .12s var(--ease); }
-/* 32px and 34px controls get a 44px hit area without growing visually. */
-.ftog, .ccy, #vtog, .mtrig { position: relative; touch-action: manipulation; }
-.ftog::after, .ccy::after, #vtog::after, .mtrig::after {
+/* Undersized controls (32px toggles, 40px star tabs, 24px card triggers) get a
+   real 44px hit area via ::after without growing visually or reflowing the bar. */
+.ftog, .ccy, #vtog, .mtrig, .tabs button, .sortbar button, .chips button, .subs button {
+  position: relative; touch-action: manipulation; }
+.ftog::after, .ccy::after, #vtog::after, .mtrig::after, .tabs button::after,
+.sortbar button::after, .chips button::after, .subs button::after {
   content: ""; position: absolute; left: 50%; top: 50%;
   width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
 .ver { flex: none; margin: 0 auto 0 0; font-size: 11px; font-weight: 650; color: var(--muted); letter-spacing: .04em; }
@@ -1120,7 +1123,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v138</b>
+      <b class="ver" id="mfver">v139</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -4792,7 +4795,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=138", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=139", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
