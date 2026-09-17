@@ -1,0 +1,1169 @@
+{
+ "v": 1,
+ "count": 63,
+ "cities": {
+  "paris": {
+   "title": "巴黎拜访清单",
+   "center": [
+    48.86,
+    2.337
+   ],
+   "loc": "fr",
+   "poiOn": {
+    "stay": true,
+    "ride": false,
+    "see": false
+   }
+  },
+  "lyon": {
+   "title": "里昂拜访清单",
+   "center": [
+    45.76,
+    4.84
+   ],
+   "loc": "fr",
+   "poiOn": {
+    "stay": false,
+    "ride": false,
+    "see": false
+   }
+  },
+  "zurich": {
+   "title": "苏黎世拜访清单",
+   "center": [
+    47.37,
+    8.54
+   ],
+   "loc": "de",
+   "poiOn": {
+    "stay": false,
+    "ride": false,
+    "see": false
+   }
+  }
+ },
+ "pois": [
+  {
+   "kind": "stay",
+   "label": "住",
+   "name": "DoubleTree Bougival",
+   "q": "doubletree bougival hilton 布吉瓦尔",
+   "lat": 48.86759,
+   "lng": 2.14531,
+   "id": "stay-paris-doubletree-bougival",
+   "city": "paris"
+  },
+  {
+   "kind": "stay",
+   "label": "住",
+   "name": "Courtyard Saint-Denis",
+   "q": "courtyard saint denis marriott 圣但尼",
+   "lat": 48.92222,
+   "lng": 2.34325,
+   "id": "stay-paris-courtyard-saint-denis",
+   "city": "paris"
+  },
+  {
+   "kind": "ride",
+   "label": "车",
+   "name": "巴黎里昂火车站",
+   "q": "gare de lyon 巴黎里昂站 里昂站",
+   "lat": 48.8448,
+   "lng": 2.3735,
+   "id": "ride-paris-x00c4449d",
+   "city": "paris"
+  },
+  {
+   "kind": "ride",
+   "label": "车",
+   "name": "Bercy-Seine 巴士站",
+   "q": "bercy-seine 贝尔西",
+   "lat": 48.8355,
+   "lng": 2.3808,
+   "id": "ride-paris-bercy-seine",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Louvre",
+   "zh": "卢浮宫",
+   "green": 3,
+   "url": "https://www.louvre.fr/",
+   "q": "louvre 卢浮宫",
+   "lat": 48.86061,
+   "lng": 2.33764,
+   "price": 22,
+   "born": 1793,
+   "lists": [
+    "UNESCO",
+    "TA前列",
+    "LP必去",
+    "NYT"
+   ],
+   "desc": "王宫改博物馆，蒙娜丽莎与胜利女神；塞纳河岸世界遗产核心。",
+   "id": "see-paris-louvre",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Versailles",
+   "zh": "凡尔赛宫",
+   "green": 3,
+   "url": "https://www.chateauversailles.fr/",
+   "q": "versailles 凡尔赛",
+   "lat": 48.80486,
+   "lng": 2.12036,
+   "price": 21,
+   "born": 1661,
+   "lists": [
+    "UNESCO",
+    "TA前列",
+    "LP必去",
+    "NYT"
+   ],
+   "desc": "路易十四旧制度宫殿，镜厅与几何花园单独成遗产。",
+   "id": "see-paris-versailles",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Tour Eiffel",
+   "zh": "埃菲尔铁塔",
+   "green": 3,
+   "url": "https://www.toureiffel.paris/",
+   "q": "eiffel 埃菲尔 铁塔",
+   "lat": 48.85837,
+   "lng": 2.29448,
+   "price": 35,
+   "born": 1889,
+   "lists": [
+    "TA前列",
+    "LP必去",
+    "NYT"
+   ],
+   "desc": "世博铁塔，全球最贵也最认的巴黎剪影，夜灯整点闪。",
+   "id": "see-paris-tour-eiffel",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Musée d'Orsay",
+   "zh": "奥赛",
+   "green": 3,
+   "url": "https://www.musee-orsay.fr/",
+   "q": "orsay 奥赛",
+   "lat": 48.86,
+   "lng": 2.32657,
+   "price": 16,
+   "born": 1986,
+   "lists": [
+    "TA前列",
+    "LP必去",
+    "NYT"
+   ],
+   "desc": "火车站改馆，印象派与后印象派最集中。",
+   "id": "see-paris-musee-d-orsay",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Notre-Dame",
+   "zh": "圣母院",
+   "green": 3,
+   "url": "https://www.notredamedeparis.fr/",
+   "q": "notre dame 圣母院",
+   "lat": 48.85297,
+   "lng": 2.3499,
+   "price": 0,
+   "born": 1163,
+   "lists": [
+    "UNESCO",
+    "TA前列",
+    "LP必去",
+    "NYT"
+   ],
+   "desc": "法兰西主教堂，火灾后重开，西岛零公里。",
+   "id": "see-paris-notre-dame",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Sainte-Chapelle",
+   "zh": "圣礼拜堂",
+   "green": 3,
+   "url": "https://www.sainte-chapelle.fr/",
+   "q": "sainte chapelle 圣礼拜堂",
+   "lat": 48.85538,
+   "lng": 2.34499,
+   "price": 13,
+   "born": 1248,
+   "lists": [
+    "UNESCO",
+    "TA前列",
+    "NYT"
+   ],
+   "desc": "路易九世圣物堂，上厅彩窗几乎包住整圈墙。",
+   "id": "see-paris-sainte-chapelle",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Invalides",
+   "zh": "荣军院",
+   "green": 3,
+   "url": "https://www.musee-armee.fr/",
+   "q": "invalides 荣军院",
+   "lat": 48.85652,
+   "lng": 2.31258,
+   "price": 15,
+   "born": 1670,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "金穹顶下拿破仑墓，陆军博物馆连成一片。",
+   "id": "see-paris-invalides",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Panthéon",
+   "zh": "先贤祠",
+   "green": 3,
+   "url": "https://www.paris-pantheon.fr/",
+   "q": "pantheon 先贤祠",
+   "lat": 48.84622,
+   "lng": 2.34642,
+   "price": 13,
+   "born": 1758,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "共和国先贤，傅科摆与地下伏墓。",
+   "id": "see-paris-pantheon",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Arc de Triomphe",
+   "zh": "凯旋门",
+   "green": 3,
+   "url": "https://www.paris-arc-de-triomphe.fr/",
+   "q": "arc triomphe 凯旋门",
+   "lat": 48.87379,
+   "lng": 2.29503,
+   "price": 16,
+   "born": 1806,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "香榭尽头星形路口，顶上看十二大道。",
+   "id": "see-paris-arc-de-triomphe",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Orangerie",
+   "zh": "橘园",
+   "green": 3,
+   "url": "https://www.musee-orangerie.fr/",
+   "q": "orangerie 橘园",
+   "lat": 48.86375,
+   "lng": 2.32266,
+   "price": 13,
+   "born": 1852,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "莫奈睡莲椭圆形厅，杜伊勒里西头。",
+   "id": "see-paris-orangerie",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Opéra Garnier",
+   "zh": "歌剧院",
+   "green": 3,
+   "url": "https://www.operadeparis.fr/",
+   "q": "opera garnier 歌剧院",
+   "lat": 48.8719,
+   "lng": 2.3316,
+   "price": 15,
+   "born": 1875,
+   "lists": [
+    "LP必去"
+   ],
+   "desc": "第二帝国楼梯与天花，歌剧魅影原型。",
+   "id": "see-paris-opera-garnier",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Centre Pompidou",
+   "zh": "蓬皮杜",
+   "green": 2,
+   "url": "https://www.centrepompidou.fr/",
+   "q": "pompidou 蓬皮杜",
+   "lat": 48.86064,
+   "lng": 2.35225,
+   "price": 18,
+   "born": 1977,
+   "lists": [
+    "Time Out",
+    "NYT"
+   ],
+   "desc": "管道外翻的现代艺术中心，顶层看右岸屋顶。",
+   "id": "see-paris-centre-pompidou",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Sacré-Cœur",
+   "zh": "圣心堂",
+   "green": 2,
+   "url": "https://www.sacre-coeur-montmartre.com/",
+   "q": "sacre coeur 圣心 蒙马特",
+   "lat": 48.8867,
+   "lng": 2.3431,
+   "price": 0,
+   "born": 1875,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "蒙马特白穹顶，台阶上看整个巴黎盆地。",
+   "id": "see-paris-sacre-c-ur",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Jardin du Luxembourg",
+   "zh": "卢森堡公园",
+   "green": 2,
+   "url": "https://www.senat.fr/visite/jardin/",
+   "q": "luxembourg 卢森堡公园",
+   "lat": 48.84622,
+   "lng": 2.33716,
+   "price": 0,
+   "born": 1612,
+   "lists": [
+    "TA前列",
+    "Time Out",
+    "NYT"
+   ],
+   "desc": "参议院前的左岸公园，模型船与椅子是日常。",
+   "id": "see-paris-jardin-du-luxembourg",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Place des Vosges",
+   "zh": "孚日广场",
+   "green": 2,
+   "q": "vosges 孚日 玛黑",
+   "lat": 48.85561,
+   "lng": 2.36552,
+   "price": 0,
+   "born": 1605,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "玛黑王家广场，拱廊连一圈红砖联排。",
+   "id": "see-paris-place-des-vosges",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Musée Rodin",
+   "zh": "罗丹美术馆",
+   "green": 2,
+   "url": "https://www.musee-rodin.fr/",
+   "q": "rodin 罗丹",
+   "lat": 48.85528,
+   "lng": 2.31582,
+   "price": 14,
+   "born": 1919,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "比龙府花园里的思想者与地狱之门。",
+   "id": "see-paris-musee-rodin",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Jardin des Tuileries",
+   "zh": "杜伊勒里",
+   "green": 2,
+   "q": "tuileries 杜伊勒里",
+   "lat": 48.8635,
+   "lng": 2.3272,
+   "price": 0,
+   "born": 1564,
+   "lists": [
+    "UNESCO"
+   ],
+   "desc": "卢浮宫到协和的王室花园，塞纳河岸遗产一段。",
+   "id": "see-paris-jardin-des-tuileries",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Place de la Concorde",
+   "zh": "协和广场",
+   "green": 2,
+   "q": "concorde 协和广场",
+   "lat": 48.8656,
+   "lng": 2.3212,
+   "price": 0,
+   "born": 1772,
+   "lists": [
+    "UNESCO"
+   ],
+   "desc": "断头台旧址，埃及方尖碑对着香榭。",
+   "id": "see-paris-place-de-la-concorde",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Champs-Élysées",
+   "zh": "香榭丽舍",
+   "green": 1,
+   "q": "champs elysees 香榭丽舍",
+   "lat": 48.8698,
+   "lng": 2.3078,
+   "price": 0,
+   "born": 1670,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "凯旋门到协和的大道，橱窗多于散步。",
+   "id": "see-paris-champs-elysees",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Père Lachaise",
+   "zh": "拉雪兹神父",
+   "green": 2,
+   "q": "pere lachaise 拉雪兹",
+   "lat": 48.8614,
+   "lng": 2.3933,
+   "price": 0,
+   "born": 1804,
+   "lists": [
+    "TA前列",
+    "LP推荐",
+    "Atlas"
+   ],
+   "desc": "王尔德、肖邦、Morrison 的墓园，巴黎最大。",
+   "id": "see-paris-pere-lachaise",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Catacombes",
+   "zh": "地下墓穴",
+   "green": 1,
+   "url": "https://www.catacombes.paris.fr/",
+   "q": "catacombes 地下墓穴",
+   "lat": 48.834,
+   "lng": 2.3324,
+   "price": 29,
+   "born": 1810,
+   "lists": [
+    "TA前列",
+    "Atlas"
+   ],
+   "desc": "运出墓骨排成巷，要预约，走一路潮冷。",
+   "id": "see-paris-catacombes",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Conciergerie",
+   "zh": "古监狱",
+   "green": 2,
+   "url": "https://www.conciergerie.fr/",
+   "q": "conciergerie 古监狱",
+   "lat": 48.856,
+   "lng": 2.3456,
+   "price": 13,
+   "born": 1300,
+   "lists": [
+    "UNESCO"
+   ],
+   "desc": "西岛王宫改监狱，玛丽王后牢房。",
+   "id": "see-paris-conciergerie",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Fondation Louis Vuitton",
+   "zh": "路易威登基金会",
+   "green": 2,
+   "url": "https://www.fondationlouisvuitton.fr/",
+   "q": "fondation louis vuitton 基金会",
+   "lat": 48.8766,
+   "lng": 2.2634,
+   "price": 16,
+   "born": 2014,
+   "lists": [
+    "Time Out"
+   ],
+   "desc": "布洛涅林园盖里帆船馆，大展常换。",
+   "id": "see-paris-fondation-louis-vuitton",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Palais-Royal",
+   "zh": "皇宫",
+   "green": 2,
+   "q": "palais royal 皇宫 庭院",
+   "lat": 48.8636,
+   "lng": 2.337,
+   "price": 0,
+   "born": 1639,
+   "lists": [
+    "LP推荐",
+    "Time Out",
+    "NYT"
+   ],
+   "desc": "黎塞留庭院与条纹柱，穿过拱廊去卢浮宫。",
+   "id": "see-paris-palais-royal",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Pont Alexandre III",
+   "zh": "亚历山大三世桥",
+   "green": 2,
+   "q": "pont alexandre 亚历山大三世桥",
+   "lat": 48.8638,
+   "lng": 2.3136,
+   "price": 0,
+   "born": 1900,
+   "lists": [
+    "TA前列",
+    "LP推荐"
+   ],
+   "desc": "世博镀金桥，荣军院对大皇宫。",
+   "id": "see-paris-pont-alexandre-iii",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Musée Picasso",
+   "zh": "毕加索博物馆",
+   "green": 2,
+   "url": "https://www.museepicassoparis.fr/",
+   "q": "picasso 毕加索 玛黑",
+   "lat": 48.8598,
+   "lng": 2.3623,
+   "price": 16,
+   "born": 1985,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "玛黑萨莱府，毕加索藏品最集中。",
+   "id": "see-paris-musee-picasso",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Canal Saint-Martin",
+   "zh": "圣马丁运河",
+   "green": 1,
+   "q": "canal saint martin 圣马丁运河",
+   "lat": 48.8708,
+   "lng": 2.3658,
+   "price": 0,
+   "born": 1825,
+   "lists": [
+    "Time Out",
+    "NYT"
+   ],
+   "desc": "运河边躺椅与铁桥，十区散步。",
+   "id": "see-paris-canal-saint-martin",
+   "city": "paris"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Palais de Tokyo",
+   "zh": "东京宫",
+   "green": 2,
+   "url": "https://www.palaisdetokyo.com/",
+   "q": "palais de tokyo 东京宫",
+   "lat": 48.864,
+   "lng": 2.2977,
+   "price": 12,
+   "born": 1937,
+   "lists": [
+    "Time Out"
+   ],
+   "desc": "当代艺术仓库，展到半夜。",
+   "id": "see-paris-palais-de-tokyo",
+   "city": "paris"
+  },
+  {
+   "kind": "stay",
+   "label": "住",
+   "name": "Lyon Marriott Cité Internationale",
+   "q": "marriott cité internationale lyon 万豪",
+   "lat": 45.7854,
+   "lng": 4.8535,
+   "id": "stay-lyon-lyon-marriott-cite-internationale",
+   "city": "lyon"
+  },
+  {
+   "kind": "ride",
+   "label": "车",
+   "name": "Tony Garnier 巴士站",
+   "q": "tony garnier gerland flixbus",
+   "lat": 45.72618,
+   "lng": 4.82814,
+   "id": "ride-lyon-tony-garnier",
+   "city": "lyon"
+  },
+  {
+   "kind": "ride",
+   "label": "车",
+   "name": "Part-Dieu 站",
+   "q": "part-dieu",
+   "lat": 45.7606,
+   "lng": 4.8594,
+   "id": "ride-lyon-part-dieu",
+   "city": "lyon"
+  },
+  {
+   "kind": "ride",
+   "label": "车",
+   "name": "Perrache 站",
+   "q": "perrache",
+   "lat": 45.7485,
+   "lng": 4.8258,
+   "id": "ride-lyon-perrache",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Fourvière",
+   "zh": "富维耶",
+   "green": 3,
+   "url": "https://www.fourviere.org/",
+   "q": "fourviere 富维耶",
+   "lat": 45.7623,
+   "lng": 4.8226,
+   "price": 0,
+   "born": 1872,
+   "lists": [
+    "UNESCO",
+    "LP必去"
+   ],
+   "desc": "里昂守护岗，圣母院与全城俯瞰；历史城区遗产。",
+   "id": "see-lyon-fourviere",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Vieux Lyon",
+   "zh": "老城",
+   "green": 3,
+   "q": "vieux lyon 老城",
+   "lat": 45.762,
+   "lng": 4.827,
+   "price": 0,
+   "born": 1500,
+   "lists": [
+    "UNESCO",
+    "LP必去"
+   ],
+   "desc": "文艺复兴岛上老城，石巷与意大利府邸。",
+   "id": "see-lyon-vieux-lyon",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Place Bellecour",
+   "zh": "贝勒库尔",
+   "green": 2,
+   "q": "bellecour 贝勒库尔",
+   "lat": 45.7578,
+   "lng": 4.832,
+   "price": 0,
+   "born": 1708,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "半岛大广场，路易十四骑马像，欧洲最大之一。",
+   "id": "see-lyon-place-bellecour",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Théâtres romains",
+   "zh": "罗马剧场",
+   "green": 2,
+   "url": "https://lugdunum.grandlyon.com/",
+   "q": "theatre romain fourviere 罗马剧场",
+   "lat": 45.7606,
+   "lng": 4.8195,
+   "price": 7,
+   "lists": [
+    "UNESCO"
+   ],
+   "desc": "卢格杜努姆剧场，夏日仍演戏。",
+   "id": "see-lyon-theatres-romains",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Musée des Confluences",
+   "zh": "科尼弗吕昂斯",
+   "green": 2,
+   "url": "https://www.museedesconfluences.fr/",
+   "q": "confluences 科尼弗吕昂斯",
+   "lat": 45.7326,
+   "lng": 4.818,
+   "price": 12,
+   "born": 2014,
+   "lists": [
+    "Time Out"
+   ],
+   "desc": "两河尖上的水晶馆，自然与人类志。",
+   "id": "see-lyon-musee-des-confluences",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Place des Terreaux",
+   "zh": "泰勒沃广场",
+   "green": 2,
+   "q": "terreaux 市政厅 泰勒沃",
+   "lat": 45.7676,
+   "lng": 4.8342,
+   "price": 0,
+   "born": 1646,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "市政厅与巴托尔迪喷泉，美院对着广场。",
+   "id": "see-lyon-place-des-terreaux",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Parc de la Tête d'Or",
+   "zh": "金头公园",
+   "green": 1,
+   "q": "tete d'or 金头公园",
+   "lat": 45.777,
+   "lng": 4.853,
+   "price": 0,
+   "born": 1857,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "湖、温室与园中园，城里最大绿地。",
+   "id": "see-lyon-parc-de-la-tete-d-or",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Traboules",
+   "zh": "穿楼巷",
+   "green": 2,
+   "q": "traboules 穿楼巷",
+   "lat": 45.7635,
+   "lng": 4.8278,
+   "price": 0,
+   "born": 1500,
+   "lists": [
+    "LP推荐",
+    "Atlas"
+   ],
+   "desc": "丝绸工穿楼捷径，老城与十字坡都有。",
+   "id": "see-lyon-traboules",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Musée des Beaux-Arts",
+   "zh": "里昂美院",
+   "green": 2,
+   "url": "https://www.mba-lyon.fr/",
+   "q": "mba lyon 美院",
+   "lat": 45.767,
+   "lng": 4.8336,
+   "price": 8,
+   "born": 1803,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "圣皮埃尔修道院改馆，法国馆藏仅次巴黎。",
+   "id": "see-lyon-musee-des-beaux-arts",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Croix-Rousse",
+   "zh": "十字坡",
+   "green": 2,
+   "q": "croix rousse 十字坡",
+   "lat": 45.7755,
+   "lng": 4.8315,
+   "price": 0,
+   "born": 1800,
+   "lists": [
+    "UNESCO"
+   ],
+   "desc": "丝绸工坡地，天井与 mur des canuts。",
+   "id": "see-lyon-croix-rousse",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Halles Paul Bocuse",
+   "zh": "博库斯市场",
+   "green": 2,
+   "url": "https://www.halles-de-lyon-paulbocuse.com/",
+   "q": "halles bocuse 博库斯市场",
+   "lat": 45.766,
+   "lng": 4.8518,
+   "price": 0,
+   "born": 1971,
+   "lists": [
+    "TA前列",
+    "LP推荐"
+   ],
+   "desc": "里昂胃，牡蛎台与圣马尔塞兰。",
+   "id": "see-lyon-halles-paul-bocuse",
+   "city": "lyon"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Amphithéâtre des Trois Gaules",
+   "zh": "高卢剧场",
+   "green": 1,
+   "q": "trois gaules 高卢圆形剧场",
+   "lat": 45.7706,
+   "lng": 4.8305,
+   "price": 0,
+   "lists": [
+    "UNESCO"
+   ],
+   "desc": "十字坡脚罗马遗迹，殉道者纪念。",
+   "id": "see-lyon-amphitheatre-des-trois-gaules",
+   "city": "lyon"
+  },
+  {
+   "kind": "ride",
+   "label": "车",
+   "name": "Hauptbahnhof",
+   "q": "hauptbahnhof",
+   "lat": 47.3782,
+   "lng": 8.5402,
+   "id": "ride-zurich-hauptbahnhof",
+   "city": "zurich"
+  },
+  {
+   "kind": "ride",
+   "label": "车",
+   "name": "苏黎世机场",
+   "q": "airport zrh 机场 苏黎世",
+   "lat": 47.4582,
+   "lng": 8.5555,
+   "id": "ride-zurich-x1ef89059",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Grossmünster",
+   "zh": "大教堂",
+   "green": 3,
+   "url": "https://www.grossmuenster.ch/",
+   "q": "grossmunster 大教堂",
+   "lat": 47.3701,
+   "lng": 8.544,
+   "price": 5,
+   "cur": "chf",
+   "born": 1100,
+   "lists": [
+    "LP必去",
+    "TA前列"
+   ],
+   "desc": "宗教改革双塔，爬南塔看老城与湖。",
+   "id": "see-zurich-grossmunster",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Fraumünster",
+   "zh": "圣母教堂",
+   "green": 2,
+   "url": "https://www.fraumuenster.ch/",
+   "q": "fraumunster 圣母教堂 chagall",
+   "lat": 47.3697,
+   "lng": 8.5412,
+   "price": 5,
+   "cur": "chf",
+   "born": 853,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "夏加尔五扇彩窗，利马特河对岸。",
+   "id": "see-zurich-fraumunster",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Kunsthaus",
+   "zh": "州立美术馆",
+   "green": 2,
+   "url": "https://www.kunsthaus.ch/",
+   "q": "kunsthaus 美术馆",
+   "lat": 47.3704,
+   "lng": 8.548,
+   "price": 23,
+   "cur": "chf",
+   "born": 1910,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "贾科梅蒂与莫奈，新馆接老馆。",
+   "id": "see-zurich-kunsthaus",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Bürkliplatz",
+   "zh": "湖滨",
+   "green": 2,
+   "q": "zurichsee burkliplatz 湖滨",
+   "lat": 47.3663,
+   "lng": 8.541,
+   "price": 0,
+   "born": 1880,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "游船码头与周末市集，看湖和阿尔卑斯。",
+   "id": "see-zurich-burkliplatz",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Lindenhof",
+   "zh": "林登霍夫",
+   "green": 2,
+   "q": "lindenhof 林登霍夫",
+   "lat": 47.373,
+   "lng": 8.5409,
+   "price": 0,
+   "born": 800,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "罗马营垒改公园，老城制高点。",
+   "id": "see-zurich-lindenhof",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Landesmuseum",
+   "zh": "国家博物馆",
+   "green": 2,
+   "url": "https://www.landesmuseum.ch/",
+   "q": "landesmuseum 国家博物馆",
+   "lat": 47.3792,
+   "lng": 8.5405,
+   "price": 10,
+   "cur": "chf",
+   "born": 1898,
+   "lists": [
+    "LP推荐"
+   ],
+   "desc": "火车站旁的国家馆，瑞士史一条线。",
+   "id": "see-zurich-landesmuseum",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Bahnhofstrasse",
+   "zh": "火车站大街",
+   "green": 1,
+   "q": "bahnhofstrasse 火车站大街",
+   "lat": 47.3746,
+   "lng": 8.5388,
+   "price": 0,
+   "born": 1864,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "银行与橱窗大道，走到湖滨。",
+   "id": "see-zurich-bahnhofstrasse",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Museum Rietberg",
+   "zh": "里特贝尔格",
+   "green": 2,
+   "url": "https://rietberg.ch/",
+   "q": "rietberg 里特贝尔格",
+   "lat": 47.3573,
+   "lng": 8.5303,
+   "price": 18,
+   "cur": "chf",
+   "born": 1952,
+   "lists": [
+    "Time Out"
+   ],
+   "desc": "非西方艺术，别墅园子里。",
+   "id": "see-zurich-museum-rietberg",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Niederdorf",
+   "zh": "下城",
+   "green": 1,
+   "q": "niederdorf 下城 老城",
+   "lat": 47.3726,
+   "lng": 8.5442,
+   "price": 0,
+   "born": 1300,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "利马特右岸酒吧巷，晚上比白天热闹。",
+   "id": "see-zurich-niederdorf",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Uetliberg",
+   "zh": "于特利山",
+   "green": 2,
+   "q": "uetliberg 于特利山",
+   "lat": 47.3516,
+   "lng": 8.4913,
+   "price": 0,
+   "lists": [
+    "TA前列",
+    "LP推荐"
+   ],
+   "desc": "近郊山脊，火车上去看湖与城。",
+   "id": "see-zurich-uetliberg",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Zoo Zürich",
+   "zh": "苏黎世动物园",
+   "green": 2,
+   "url": "https://www.zoo.ch/",
+   "q": "zoo zurich 动物园",
+   "lat": 47.3851,
+   "lng": 8.5742,
+   "price": 32,
+   "cur": "chf",
+   "born": 1929,
+   "lists": [
+    "TA前列",
+    "LP推荐"
+   ],
+   "desc": "苏黎世山欧洲顶尖园，马斯瓦拉草原。",
+   "id": "see-zurich-zoo-zurich",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "Chinagarten",
+   "zh": "中国园",
+   "green": 1,
+   "q": "chinagarten 中国园",
+   "lat": 47.3552,
+   "lng": 8.5528,
+   "price": 0,
+   "born": 1994,
+   "lists": [
+    "TA前列"
+   ],
+   "desc": "湖东岸赠园，亭桥与秋色。",
+   "id": "see-zurich-chinagarten",
+   "city": "zurich"
+  },
+  {
+   "kind": "see",
+   "label": "景",
+   "name": "FIFA Museum",
+   "zh": "FIFA博物馆",
+   "green": 1,
+   "url": "https://www.fifamuseum.com/",
+   "q": "fifa museum 足球",
+   "lat": 47.3636,
+   "lng": 8.5325,
+   "price": 24,
+   "cur": "chf",
+   "born": 2016,
+   "lists": [
+    "Time Out"
+   ],
+   "desc": "火车站旁足球史，奖杯会轮换。",
+   "id": "see-zurich-fifa-museum",
+   "city": "zurich"
+  }
+ ]
+}
