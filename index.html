@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="177">
+<html lang="zh-CN" data-city="paris" data-ver="178">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v177</title>
+<title>工作笔记 v178</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1142,7 +1142,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v177</b>
+      <b class="ver" id="mfver">v178</b>
     </div>
   </div>
 </header>
@@ -1161,6 +1161,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
 <div class="sortbar" id="sort">
   <button type="button" data-sort="now">星级</button>
   <button type="button" data-sort="dist">距离</button>
+  <button type="button" data-sort="late">末席</button>
   <button type="button" data-sort="age">店龄</button>
   <button type="button" data-sort="go">值得</button>
   <button type="button" data-sort="rev">评论</button>
@@ -1771,11 +1772,11 @@ function revOf(c) {
 }
 function restoreSort(raw) {
   if (!sortEl) return;
-  const m = String(raw || "").match(/^(now|price|dist|age|go|rev)(?:-(asc|desc))?$/);
+  const m = String(raw || "").match(/^(now|price|dist|age|go|rev|late)(?:-(asc|desc))?$/);
   sortEl.querySelectorAll(":scope > button").forEach(b => {
     const on = !!(m && b.dataset.sort === m[1]);
     b.classList.toggle("on", on);
-    if (on) b.dataset.dir = m[2] || (m[1] === "now" || m[1] === "go" || m[1] === "rev" ? "desc" : "asc");
+    if (on) b.dataset.dir = m[2] || (m[1] === "now" || m[1] === "go" || m[1] === "rev" || m[1] === "late" ? "desc" : "asc");
   });
 }
 function bindSort() {
@@ -1788,7 +1789,7 @@ function bindSort() {
     } else {
       sortEl.querySelectorAll(":scope > button").forEach(x => x.classList.remove("on"));
       b.classList.add("on");
-      b.dataset.dir = (b.dataset.sort === "now" || b.dataset.sort === "go" || b.dataset.sort === "rev") ? "desc" : "asc";
+      b.dataset.dir = (b.dataset.sort === "now" || b.dataset.sort === "go" || b.dataset.sort === "rev" || b.dataset.sort === "late") ? "desc" : "asc";
     }
     window.apply();
   });
@@ -2093,6 +2094,13 @@ function apply() {
       if (!ra) return 1;
       if (!rb) return -1;
       return (ra - rb) * dir || Number(a.dataset.i) - Number(b.dataset.i);
+    }
+    if (field === "late") {
+      const la = a.dataset.bookLast || "", lb = b.dataset.bookLast || "";
+      if (!la && !lb) return Number(a.dataset.i) - Number(b.dataset.i);
+      if (!la) return 1;
+      if (!lb) return -1;
+      return la.localeCompare(lb) * dir || Number(a.dataset.i) - Number(b.dataset.i);
     }
     if (field === "i") return Number(a.dataset.i) - Number(b.dataset.i);
     return (Number(a.dataset[field] || 0) - Number(b.dataset[field] || 0)) * dir || Number(a.dataset.i) - Number(b.dataset.i);
@@ -3908,12 +3916,13 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
   const sortEl = document.querySelector("#sort");
   const COLS = [
     ["dist", "56px", "距离"],
+    ["late", "44px", "末席"],
     ["age", "36px", "店龄"],
     ["go", "28px", "值得"],
     ["rev", "40px", "评论"],
     ["price", "48px", "价格"],
   ];
-  const CK = "mf-cols";
+  const CK = "mf-cols2";
   function loadCols() {
     try {
       const a = JSON.parse(localStorage.getItem(CK) || "null");
@@ -3946,11 +3955,12 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
   min-width: 0;
 }
 .sortbar [data-sort="now"] { grid-column: 1 / 3; margin-right: 0; justify-self: start; }
-.sortbar [data-sort="dist"], .sortbar [data-sort="age"],
+.sortbar [data-sort="dist"], .sortbar [data-sort="late"], .sortbar [data-sort="age"],
 .sortbar [data-sort="go"], .sortbar [data-sort="rev"], .sortbar [data-sort="price"] {
   text-align: right; min-width: 0; justify-self: stretch;
 }
 .sortbar [data-sort="dist"] { grid-column: var(--col-dist); }
+.sortbar [data-sort="late"] { grid-column: var(--col-late); }
 .sortbar [data-sort="age"] { grid-column: var(--col-age); }
 .sortbar [data-sort="go"] { grid-column: var(--col-go); }
 .sortbar [data-sort="rev"] { grid-column: var(--col-rev); }
@@ -3966,6 +3976,8 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
 #cpanel button.on { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 html[data-hide~="dist"] .sortbar [data-sort="dist"],
 html[data-hide~="dist"] main.compact .card .mdist,
+html[data-hide~="late"] .sortbar [data-sort="late"],
+html[data-hide~="late"] main.compact .card .mlate,
 html[data-hide~="age"] .sortbar [data-sort="age"],
 html[data-hide~="age"] main.compact .card .mage,
 html[data-hide~="go"] .sortbar [data-sort="go"],
@@ -4062,7 +4074,6 @@ main.compact .card:not(.open) h3 .zh {
   color: var(--muted); margin-left: 0;
 }
 main.compact .card:not(.open) h3 .mbest { order: 3; flex-shrink: 0; }
-main.compact .card:not(.open) h3 .booklast { order: 4; flex-shrink: 0; }
 main.compact .card.open h3 {
   overflow: visible; white-space: normal; flex-wrap: wrap;
   font-size: 14px; font-weight: 600; line-height: 1.3;
@@ -4086,6 +4097,7 @@ main.compact .card.open .loc {
 }
 main.compact .card .loc::before { display: none; }
 main.compact .card .mdist,
+main.compact .card .mlate,
 main.compact .card .mage,
 main.compact .card .mgo,
 main.compact .card .mrev {
@@ -4095,15 +4107,19 @@ main.compact .card .mrev {
   font-variant-numeric: tabular-nums; text-align: right;
 }
 main.compact .card .mdist { grid-column: var(--col-dist); overflow: visible; text-overflow: unset; }
+main.compact .card .mlate { grid-column: var(--col-late); }
+main.compact .card .mlate.late { color: var(--gold); }
 main.compact .card .mage { grid-column: var(--col-age); }
 main.compact .card .mgo { grid-column: var(--col-go); }
 main.compact .card .mrev { grid-column: var(--col-rev); }
 html[data-sort="dist"] main.compact .card .mdist,
 html[data-sort="age"] main.compact .card .mage,
 html[data-sort="go"] main.compact .card .mgo,
-html[data-sort="rev"] main.compact .card .mrev {
+html[data-sort="rev"] main.compact .card .mrev,
+html[data-sort="late"] main.compact .card .mlate:not(.late) {
   color: var(--live); font-weight: 650;
 }
+html[data-sort="late"] main.compact .card .mlate { font-weight: 650; }
 main.compact .card::after {
   grid-column: var(--col-price); grid-row: 1; align-self: center;
   content: attr(data-p);
@@ -4133,6 +4149,7 @@ main.compact .card.open { cursor: default; }
 main.compact .card.open header,
 main.compact .card.open .loc,
 main.compact .card.open .mdist,
+main.compact .card.open .mlate,
 main.compact .card.open .mage,
 main.compact .card.open .mgo,
 main.compact .card.open .mrev { cursor: pointer; }
@@ -4394,12 +4411,6 @@ main.compact .card.open .mwhen { display: none !important; }
 #flunchw { display: none; }
 html[data-city="paris"] #flunchw { display: block; }
 .booklast { display: none; }
-main.compact .card:not(.open) .booklast {
-  display: inline; flex: none; margin-left: 4px;
-  font-size: 10px; font-weight: 650; font-style: normal;
-  color: var(--muted); letter-spacing: 0;
-}
-main.compact .card:not(.open) .booklast.late { color: var(--gold); }
 main.compact .card.open .kv[data-k="book"] { order: 5; }
 .kv[data-k="book"] > b {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-weight: 650;
@@ -4474,18 +4485,17 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
     const dinner = c.dataset.meal === "dinner";
     c.dataset.bookLast = last;
     c.dataset.bookStat = stat;
-    const h3 = c.querySelector("header h3");
-    let pill = h3 && h3.querySelector(".booklast");
-    const txt = pillText(last, stat);
-    if (h3 && txt) {
-      if (!pill) {
-        pill = document.createElement("b");
-        pill.className = "booklast";
-        h3.appendChild(pill);
-      }
-      pill.textContent = txt;
-      pill.classList.toggle("late", dinner ? last >= "21:00" : isLunchLast(last));
-    } else if (pill) pill.remove();
+    const old = c.querySelector("h3 .booklast");
+    if (old) old.remove();
+    let el = c.querySelector(":scope > .mlate");
+    const txt = pillText(last, stat) || "—";
+    if (!el) {
+      el = document.createElement("em");
+      el.className = "mlate";
+      c.appendChild(el);
+    }
+    el.textContent = txt;
+    el.classList.toggle("late", !!(last && (dinner ? last >= "21:00" : isLunchLast(last))));
     let kv = c.querySelector('.kv[data-k="book"]')
       || [...c.querySelectorAll(":scope > .kv")].find(el =>
         (el.querySelector("span") || {}).textContent === "订位");
@@ -4953,7 +4963,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=177", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=178", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
