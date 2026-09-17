@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="126">
+<html lang="zh-CN" data-city="paris" data-ver="127">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v126</title>
+<title>工作笔记 v127</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v126</b>
+      <b class="ver" id="mfver">v127</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -2963,12 +2963,8 @@ setCity(city, true);
 
   paintAll();
   if (typeof window.apply === "function") window.apply();
-  askHere();
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      askHere();
-      sync();
-    }
+    if (document.visibilityState === "visible") sync();
   });
   ghCallback().then(hit => { if (!hit) sync(); });
   window.mfPaintCard = paint;
@@ -4345,7 +4341,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=126", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=127", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
