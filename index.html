@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="139">
+<html lang="zh-CN" data-city="paris" data-ver="140">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v139</title>
+<title>工作笔记 v140</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -728,7 +728,7 @@ button { appearance: none; border: 1px solid var(--line); background: var(--card
   transition: color var(--t) var(--ease), background var(--t) var(--ease),
     border-color var(--t) var(--ease), transform .2s var(--ease); }
 button:active { transform: scale(.97); }
-.chips button.on, .subs button.on { background: var(--on); color: #fff8f2; border-color: var(--on); }
+.chips button.on, .subs button.on { background: var(--mic); color: #fff8f2; border-color: var(--mic); }
 .cities button { border: 0; border-radius: 0; background: none; padding: 0 16px 0 0;
   color: var(--muted); font-size: 14px; font-weight: 500; letter-spacing: .12em;
   height: 44px; line-height: 44px; transform: none; }
@@ -736,24 +736,25 @@ button:active { transform: scale(.97); }
 .boxes button { border: 0; border-radius: 0; background: none; padding: 0 10px 0 0;
   color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: .06em;
   height: 44px; line-height: 44px; transform: none; }
-.boxes button.on { background: none; color: var(--ink); font-weight: 600; border: 0; }
+.boxes button.on { background: none; color: var(--mic); font-weight: 600; border: 0; }
 .tabs button { border: 0; border-radius: 0; background: none; padding: 0 10px;
   color: var(--muted); font-weight: 500; font-size: 13px; letter-spacing: .08em;
-  height: 40px; border-bottom: 1px solid transparent; white-space: nowrap; transform: none; }
+  height: 40px; border-bottom: 2px solid transparent; white-space: nowrap; transform: none; }
 .tabs button.on { background: none; color: var(--ink); font-weight: 600;
-  border: 0; border-bottom: 1px solid var(--ink); }
+  border: 0; border-bottom: 2px solid var(--mic); }
 /* filter toggle in tabbar */
 .ftog { flex: none; width: 32px; height: 32px; padding: 0; font-size: 16px;
   border-radius: 2px; display: flex; align-items: center; justify-content: center; }
-.ftog.hot, .ftog.open { background: var(--ink); color: #fff; border-color: var(--ink); }
+.ftog.hot, .ftog.open { background: var(--mic); color: #fff; border-color: var(--mic); }
 
 /* ── Filter dropdown (anchored under #ftog, overlays search) ── */
-.panel-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(20,17,15,.28);
+.panel-overlay { position: fixed; inset: 0; z-index: 1013; background: rgba(20,17,15,.36);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   opacity: 0; pointer-events: none; transition: opacity var(--t) var(--ease); }
 .panel-overlay.on { opacity: 1; pointer-events: auto; }
 .panel { position: absolute; left: var(--pad); right: var(--pad);
   top: calc(max(0px, env(safe-area-inset-top)) + 90px);
-  z-index: 20; background: var(--card); border-radius: 4px;
+  z-index: 1014; background: var(--card); border-radius: 4px;
   padding: 12px; max-height: min(78vh, 560px); overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 18px 40px rgba(20,17,15,.16);
@@ -788,7 +789,7 @@ main { padding: 10px var(--pad) 48px; padding-bottom: max(48px, env(safe-area-in
 .card.dim { opacity: .65; }
 .card header { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
 .starbox { display: flex; gap: 6px; flex: none; font-size: 11px; font-weight: 700; }
-.starbox .now { color: var(--gold); }
+.starbox .now { color: var(--mic); }
 .starbox .peak { color: var(--muted); }
 .starbox .peak.down { color: var(--gold); }
 .card em { flex: none; font-style: normal; font-weight: 600; color: var(--muted); font-size: 11px; }
@@ -923,7 +924,7 @@ body.maplock header.top { z-index: 2100; }
 #msheet.mapsheet { left: 8px; right: 8px; bottom: 8px; max-height: none;
   overflow: hidden; border-radius: 10px; padding: 0; }
 .mapsheet .mpin { display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
-.mapsheet .mpin-star { flex: none; font-size: 11px; font-weight: 700; color: var(--gold); }
+.mapsheet .mpin-star { flex: none; font-size: 11px; font-weight: 700; color: var(--mic); }
 .mapsheet .mpin-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap;
   text-overflow: ellipsis; font-size: 13px; font-weight: 650; }
 .mapsheet .mpin-price { flex: none; font-size: 12px; font-weight: 650; color: var(--muted); }
@@ -940,7 +941,7 @@ html[data-star="plan"] #sort { display: none; }
 }
 .sortbar button { border: 0; background: none; padding: 4px 0;
   font-size: 11px; color: var(--muted); border-radius: 0; letter-spacing: .04em; }
-.sortbar button.on { color: var(--ink); font-weight: 650; background: none; border: 0; }
+.sortbar button.on { color: var(--mic); font-weight: 650; background: none; border: 0; }
 .sortbar button.on[data-dir="asc"]::after { content: " ↑"; }
 .sortbar button.on[data-dir="desc"]::after { content: " ↓"; }
 .leaflet-marker-icon.pin, .leaflet-marker-icon.poi {
@@ -1123,7 +1124,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v139</b>
+      <b class="ver" id="mfver">v140</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -2707,11 +2708,11 @@ setCity(city, true);
 .mdist { font-style: normal; font-weight: 550; color: var(--muted); font-size: 11px; }
 .mine { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(166,92,50,.1); }
 .macts { display: flex; gap: 8px; align-items: center; }
-.mtrig { height: 24px; padding: 0 10px; border: 0; border-radius: 8px;
+.mtrig { height: 32px; padding: 0 12px; border: 0; border-radius: 2px;
   display: inline-flex; align-items: center; justify-content: center;
   background: rgba(26,25,23,.05); color: var(--ink);
   font-size: 12px; font-weight: 550; letter-spacing: .04em; }
-.mtrig.on { background: #ead6c0; color: var(--gold); }
+.mtrig.on { background: #f3e0de; color: var(--mic); }
 .mine .mmemo { width: 100%; margin-top: 8px; padding: 6px 12px; border: 0;
   border-radius: 8px; font: inherit; font-size: 13px; background: rgba(26,25,23,.04); }
 #mmenu { position: fixed; z-index: 2200; min-width: 128px; padding: 4px;
@@ -2720,7 +2721,7 @@ setCity(city, true);
 #mmenu.on { display: flex; flex-direction: column; }
 #mmenu button { height: 40px; padding: 0 14px; border: 0; border-radius: 8px;
   background: transparent; text-align: left; font-size: 14px; }
-#mmenu button.on { background: #f7efe6; color: var(--gold); font-weight: 650; }
+#mmenu button.on { background: #f6ece8; color: var(--mic); font-weight: 650; }
 #mf-st { font-size: 11px; color: var(--muted); }
 .kv a.mlink { font-size: 11px; font-weight: 650; color: var(--accent); text-decoration: none; }
 #mf-tok { flex: 1 1 100%; }
@@ -3864,7 +3865,7 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
   const css = document.createElement("style");
   css.textContent = `
 #vtog { width: auto; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 2px; letter-spacing: .06em; }
-#vtog.hot { background: var(--ink); color: #fff; border-color: var(--ink); }
+#vtog.hot { background: var(--mic); color: #fff; border-color: var(--mic); }
 #sort.sortbar {
   display: grid; grid-template-columns: 36px minmax(0,1fr) 48px 40px 32px 56px;
   column-gap: 6px; align-items: center; padding: 2px 10px 6px;
@@ -3880,30 +3881,29 @@ main.compact .card {
   display: grid;
   grid-template-columns: 36px minmax(0,1fr) 48px 40px 32px 56px;
   align-items: center;
-  padding: 6px 10px; margin-bottom: 0;
+  padding: 10px 12px; margin-bottom: 0;
   column-gap: 6px; row-gap: 0;
   background: transparent; border: 0; border-bottom: 1px solid var(--line);
   border-radius: 0; box-shadow: none; cursor: pointer;
-  touch-action: manipulation;
-  transition: box-shadow .12s var(--ease), transform .12s var(--ease);
-  content-visibility: auto; contain-intrinsic-size: auto 36px;
+  touch-action: pan-y;
+  transition: box-shadow .12s var(--ease), transform .12s var(--ease), background .18s var(--ease);
+  content-visibility: auto; contain-intrinsic-size: auto 44px;
 }
-main.compact .card.want { background: #f7efe6; }
+main.compact .card.want { background: #f6ece8; }
 main.compact .card.skip { background: #ebe6df; }
 main.compact .card.press {
-  /* The old 8% wash was effectively invisible; a press has to be felt. */
   box-shadow: inset 0 0 0 999px rgba(143, 22, 38, .10);
 }
 main.compact .card:not(.open).press { transform: scale(.988); }
 main.compact .card.open {
   background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--radius); box-shadow: none;
-  margin: 2px 0; padding: 8px 10px;
+  border-radius: 4px; box-shadow: 0 8px 24px rgba(20,17,15,.06);
+  margin: 6px 0; padding: 12px;
   content-visibility: visible; contain-intrinsic-size: unset;
 }
 main.compact button { transition: transform .16s var(--ease); }
 main.compact button:active { transform: scale(.97); }
-main.compact .card.open.want { background: #f8f1e8; }
+main.compact .card.open.want { background: #f8eee9; }
 main.compact .card header {
   grid-column: 1 / 3; grid-row: 1; display: flex; align-items: center;
   gap: 5px; overflow: hidden; flex-wrap: nowrap; min-width: 0;
@@ -3926,7 +3926,7 @@ main.compact .card:not(.open) header > em:not(.open):not(.mwhen) { background: #
 main.compact .card:not(.open) header > em:not(.open):not(.mwhen)::before { color: #8c867e; }
 main.compact .card .starbox .now { font-size: 0; }
 main.compact .card .starbox .now::after {
-  font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0;
+  font-size: 11px; font-weight: 700; color: var(--mic); letter-spacing: 0;
 }
 main.compact .card[data-now="3"] .starbox .now::after { content: "★★★"; }
 main.compact .card[data-now="2"] .starbox .now::after { content: "★★"; }
@@ -3951,8 +3951,8 @@ main.compact .card .starbox .peak::after {
 }
 main.compact .card h3 {
   display: flex; align-items: center; gap: 4px;
-  font: 600 13px/1.25 "PingFang SC", "Hiragino Sans GB", -apple-system, sans-serif;
-  letter-spacing: 0; min-width: 0; flex: 1; overflow: hidden;
+  font: 500 15px/1.25 "Iowan Old Style", Palatino, "Songti SC", "STSong", "Noto Serif SC", Georgia, serif;
+  letter-spacing: .01em; min-width: 0; flex: 1; overflow: hidden;
 }
 main.compact .card:not(.open) h3 .mfname {
   display: block; min-width: 0; overflow: hidden;
@@ -4795,7 +4795,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=139", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=140", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
