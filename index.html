@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="130">
+<html lang="zh-CN" data-city="paris" data-ver="131">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v130</title>
+<title>工作笔记 v131</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v130</b>
+      <b class="ver" id="mfver">v131</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -3702,8 +3702,7 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
         html += '<div class="pslot' + (pick === k ? " on" : "") + '" data-slot="' + k + '">'
           + '<span class="plab">' + lab + "</span>"
           + '<span class="pname' + (c ? "" : " empty") + '">' + esc(name) + "</span>"
-          + (c ? '<button type="button" class="px" data-clear-name="' + esc(c.dataset.name)
-            + '" data-clear-lat="' + esc(c.dataset.lat || "") + '">×</button>' : "")
+          + (c ? '<button type="button" class="px" data-clear-id="' + esc(c.dataset.id || "") + '">×</button>' : "")
           + "</div>";
         const next = c && (cards[j + 1] || keys.slice(i + 1).flatMap(slotCards)[0]);
         if (c && next) html += '<div class="phop">' + esc(hop(c, next)) + "</div>";
@@ -3776,9 +3775,8 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
     }
   }
 
-  function findCard(name, lat) {
-    return wantHere().find(c => c.dataset.name === name && (!lat || c.dataset.lat === lat))
-      || pane().querySelector('.card[data-name="' + CSS.escape(name) + '"]');
+  function findCard(id) {
+    return document.querySelector('.card[data-id="' + CSS.escape(id) + '"]');
   }
 
   document.querySelectorAll(".cities button").forEach(b => {
@@ -3795,9 +3793,9 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
     if (menu) { menu.classList.toggle("on"); return; }
     const dayBtn = e.target.closest("[data-day]");
     if (dayBtn) { goDay(dayBtn.dataset.day); return; }
-    const clear = e.target.closest("[data-clear-name]");
+    const clear = e.target.closest("[data-clear-id]");
     if (clear) {
-      const c = findCard(clear.dataset.clearName, clear.dataset.clearLat);
+      const c = findCard(clear.dataset.clearId);
       if (c && window.mfPutPlan) window.mfPutPlan(c, "", "");
       return;
     }
@@ -4766,7 +4764,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=130", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=131", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
