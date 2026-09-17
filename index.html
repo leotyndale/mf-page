@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="136">
+<html lang="zh-CN" data-city="paris" data-ver="137">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v136</title>
+<title>工作笔记 v137</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1106,7 +1106,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fcui"></select>
     </div>
     <div class="fbar">
-      <b class="ver" id="mfver">v136</b>
+      <b class="ver" id="mfver">v137</b>
       <button type="button" id="freset">重置</button>
     </div>
   </div>
@@ -1533,16 +1533,26 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       if (isEmpty(r)) continue;
       notes[id] = { done: r.done, note: r.note, tags: r.tags, day: r.day, meal: r.meal, ts: r.ts };
     }
-    return { v: 3, ops: [...ops.values()], notes, book, ui };
+    // Orphans ride along: a note whose restaurant was renamed or dropped from the
+    // catalog must not disappear from the cloud copy just because this device
+    // could not match it to a card.
+    return { v: 3, ops: [...ops.values()], notes, book, ui, orphans };
   }
   function importPack(remote) {
     if (!remote || typeof remote !== "object") return 0;
-    if (Array.isArray(remote.ops) && remote.ops.length) return mergeOps(remote.ops);
+    // Orphans are re-resolved on every import, so fixing a name later reunites them.
     const idx = cardIndex();
+    let n = 0;
+    if (remote.orphans && typeof remote.orphans === "object") {
+      const before = Object.keys(orphans).length;
+      n += mergeOps(legacyToOps(remote.orphans, idx.legacy));
+      if (Object.keys(orphans).length !== before) meta("orphans", orphans).catch(() => {});
+    }
+    if (Array.isArray(remote.ops) && remote.ops.length) return n + mergeOps(remote.ops);
     const notes = remote.v === 2 && remote.notes ? remote.notes : remote.notes || remote;
     const resolve = k => (state[k] || /^(paris|lyon|zurich)-/.test(k) ? k : idx.legacy(k));
-    return mergeOps(
-      legacyToOps(notes, resolve).concat(legacyBookToOps(remote.book, n => idx.name(n) || n))
+    return n + mergeOps(
+      legacyToOps(notes, resolve).concat(legacyBookToOps(remote.book, n2 => idx.name(n2) || n2))
     );
   }
 
@@ -4763,7 +4773,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=136", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=137", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
