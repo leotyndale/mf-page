@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="172">
+<html lang="zh-CN" data-city="paris" data-ver="173">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v172</title>
+<title>工作笔记 v173</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1142,7 +1142,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v172</b>
+      <b class="ver" id="mfver">v173</b>
     </div>
   </div>
 </header>
@@ -3990,11 +3990,11 @@ main.compact .card {
 }
 main.compact .card.want { background: var(--want); transition: none; }
 main.compact .card.skip { background: var(--skip); }
-main.compact .card:has(+ .card.open) { border-bottom: 0; }
 main.compact .card.open {
-  background: var(--bg); border: 1px solid var(--line);
-  border-radius: var(--radius); box-shadow: none;
-  margin: 0; padding: 10px var(--pad) 12px;
+  background: var(--bg); border: 0; border-bottom: 1px solid var(--line);
+  border-left: 1px solid var(--line); border-right: 1px solid var(--line);
+  border-radius: 0 0 var(--radius) var(--radius); box-shadow: none;
+  margin: 0; padding: 6px var(--pad) 12px;
   content-visibility: visible; contain-intrinsic-size: unset;
   transition: none;
 }
@@ -4955,7 +4955,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=172", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=173", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
