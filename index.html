@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="153">
+<html lang="zh-CN" data-city="paris" data-ver="161">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v153</title>
+<title>工作笔记 v161</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -678,8 +678,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 :root {
   --ink: #1a1917; --muted: #8c867e; --line: #e6e0d8; --bg: #f3efe8; --card: #faf8f4;
   --on: #1a1917; --pad: 16px; --accent: #1a1917; --gold: #a65c32; --live: #a65c32; --icon: #a39486;
-  --mic: #8f1626; --radius: 2px;
-  --wash: rgba(143,22,38,.08); --want: #f6ece8; --skip: #ebe6df;
+  --mic: #8f1626; --radius: 8px;
+  --wash: rgba(143,22,38,.08); --onfill: var(--wash); --want: #f6ece8; --skip: #ebe6df;
   --ease: cubic-bezier(.22,1,.36,1); --t: .28s;
 }
 * { box-sizing: border-box; }
@@ -729,24 +729,24 @@ button { appearance: none; border: 1px solid var(--line); background: var(--card
   transition: color var(--t) var(--ease), background var(--t) var(--ease),
     border-color var(--t) var(--ease); }
 button:active { background: var(--wash); }
-.chips button.on, .subs button.on { background: var(--mic); color: #fff8f2; border-color: var(--mic); }
+.chips button.on, .subs button.on { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 .cities button { border: 0; border-radius: 0; background: none; padding: 0 16px 0 0;
-  color: var(--muted); font-size: 14px; font-weight: 500; letter-spacing: .12em;
+  color: var(--muted); font-size: 14px; font-weight: 500; letter-spacing: .02em;
   height: 44px; line-height: 44px; transform: none; }
 .cities button.on { background: none; color: var(--ink); font-weight: 600; border: 0; }
 .boxes button { border: 0; border-radius: 0; background: none; padding: 0 10px 0 0;
-  color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: .06em;
+  color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: .02em;
   height: 44px; line-height: 44px; transform: none; }
 .boxes button.on { background: none; color: var(--mic); font-weight: 600; border: 0; }
 .tabs button { border: 0; border-radius: 0; background: none; padding: 0 10px;
-  color: var(--muted); font-weight: 500; font-size: 13px; letter-spacing: .08em;
+  color: var(--muted); font-weight: 500; font-size: 13px; letter-spacing: .02em;
   height: 40px; border-bottom: 2px solid transparent; white-space: nowrap; transform: none; }
 .tabs button.on { background: none; color: var(--ink); font-weight: 600;
   border: 0; border-bottom: 2px solid var(--mic); }
 /* filter toggle in tabbar */
 .ftog { flex: none; width: 32px; height: 32px; padding: 0; font-size: 16px;
   border-radius: var(--radius); display: flex; align-items: center; justify-content: center; }
-.ftog.hot, .ftog.open { background: var(--mic); color: #fff; border-color: var(--mic); }
+.ftog.hot, .ftog.open { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 
 /* ── Filter dropdown (anchored under #ftog, overlays search) ── */
 .panel-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(20,17,15,.28);
@@ -794,10 +794,9 @@ main { padding: 10px var(--pad) 48px; padding-bottom: max(48px, env(safe-area-in
 .card em { flex: none; font-style: normal; font-weight: 600; color: var(--muted); font-size: 11px; }
 .card em.open { color: #3d6b5a; }
 .card h3 { margin: 0; flex: 1; min-width: 40%;
-  font: 600 16.5px/1.3 "Iowan Old Style", Palatino, "Songti SC", "STSong", "Noto Serif SC", Georgia, serif;
-  letter-spacing: .015em; }
+  font-size: 15px; font-weight: 600; line-height: 1.35; letter-spacing: .01em; }
 .card h3 a, .loc a { color: inherit; text-decoration: none; }
-.card h3 .zh { font-style: normal; font-weight: 500; color: var(--muted); font-size: 13px; margin-left: .35em; }
+.card h3 .zh { font-style: normal; font-weight: 400; color: var(--muted); font-size: 12px; margin-left: .35em; }
 .kv a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
 .sub, .loc { display: flex; align-items: flex-start; gap: 6px; color: var(--muted); font-size: 12px; }
 .sub { margin: 3px 0 0; }
@@ -992,7 +991,7 @@ html[data-star="plan"] #sort { display: none; }
   min-height: 28px; padding: 0 8px; font-size: 12px;
   background: transparent; color: var(--ink);
 }
-#fpanel .chips button.on { background: var(--mic); color: #fff8f2; border-color: var(--mic); }
+#fpanel .chips button.on { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 #fpanel .chips button::after { content: none; }
 #fpanel #fdays { flex-wrap: nowrap; }
 #fpanel .tools {
@@ -1155,7 +1154,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v153</b>
+      <b class="ver" id="mfver">v161</b>
     </div>
   </div>
 </header>
@@ -2762,7 +2761,7 @@ setCity(city, true);
   display: inline-flex; align-items: center; justify-content: center;
   background: transparent; color: var(--ink);
   font-size: 12px; font-weight: 550; letter-spacing: .04em; }
-.mtrig.on { background: var(--mic); color: #fff8f2; border-color: var(--mic); }
+.mtrig.on { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 .mine .mmemo { width: 100%; margin-top: 8px; padding: 6px 12px; border: 1px solid var(--line);
   border-radius: var(--radius); font: inherit; font-size: 13px; background: var(--bg); }
 #mmenu { position: fixed; z-index: 2200; min-width: 128px; padding: 4px;
@@ -3612,8 +3611,8 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
   line-height: 1.2; }
 .pchip i { display: block; font-style: normal; font-size: 15px; font-weight: 700; }
 .pchip b { display: block; font-size: 10px; font-weight: 500; color: var(--muted); }
-.pchip.on { background: var(--mic); color: #fff8f2; border-color: var(--mic); }
-.pchip.on b { color: rgba(255,248,242,.8); }
+.pchip.on { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
+.pchip.on b { color: var(--mic); }
 .pchip.mark { box-shadow: inset 0 -2px 0 var(--gold); }
 .pchip.on.mark { box-shadow: inset 0 -2px 0 var(--gold); }
 .pmon { flex: none; align-self: center; padding: 0 4px 0 2px; font-size: 11px; color: var(--muted); }
@@ -3914,28 +3913,78 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
     else bar.insertAdjacentHTML("beforeend", btn);
   }
   const vtog = document.querySelector("#vtog");
+  if (!document.querySelector("#ctog")) {
+    vtog.insertAdjacentHTML("afterend", '<button type="button" class="vtog" id="ctog">列</button>');
+  }
+  const ctog = document.querySelector("#ctog");
+  const sortEl = document.querySelector("#sort");
+  const COLS = [
+    ["dist", "44px", "距离"],
+    ["age", "36px", "店龄"],
+    ["go", "28px", "值得"],
+    ["rev", "40px", "评论"],
+    ["price", "48px", "价格"],
+  ];
+  const CK = "mf-cols";
+  function loadCols() {
+    try {
+      const a = JSON.parse(localStorage.getItem(CK) || "null");
+      if (Array.isArray(a)) return new Set(COLS.map(c => c[0]).filter(id => a.includes(id)));
+    } catch {}
+    if (innerWidth < 480) return new Set(["dist", "price"]);
+    return new Set(COLS.map(c => c[0]));
+  }
+  let shown = loadCols();
+  if (sortEl && !document.querySelector("#cpanel")) {
+    sortEl.insertAdjacentHTML("afterend",
+      '<div class="cpanel" id="cpanel">'
+      + COLS.map(c => '<button type="button" data-col="' + c[0] + '">' + c[2] + "</button>").join("")
+      + "</div>");
+  }
+  const cpanel = document.querySelector("#cpanel");
 
   const css = document.createElement("style");
   css.textContent = `
-#vtog { width: auto; height: 32px; padding: 0 8px; font-size: 12px;
+#vtog, #ctog { flex: none; width: auto; height: 32px; padding: 0 8px; font-size: 12px;
   border: 1px solid var(--line); border-radius: var(--radius); background: var(--card);
-  letter-spacing: .06em; }
-#vtog.hot { background: var(--mic); color: #fff; border-color: var(--mic); }
+  letter-spacing: .02em; }
+#vtog.hot, #ctog.hot { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 #sort.sortbar {
-  display: grid; grid-template-columns: 36px minmax(0,1fr) 44px 36px 28px 40px 48px;
+  display: grid; grid-template-columns: var(--mf-cols, 36px minmax(0,1fr) minmax(0,44px) minmax(0,36px) minmax(0,28px) minmax(0,40px) minmax(0,48px));
   column-gap: 6px; align-items: center; padding: 2px var(--pad) 6px;
+  min-width: 0;
 }
 .sortbar [data-sort="now"] { grid-column: 1 / 3; margin-right: 0; justify-self: start; }
 .sortbar [data-sort="dist"], .sortbar [data-sort="age"],
 .sortbar [data-sort="go"], .sortbar [data-sort="rev"], .sortbar [data-sort="price"] { text-align: right; min-width: 0; }
-.sortbar [data-sort="dist"] { grid-column: 3; }
-.sortbar [data-sort="age"] { grid-column: 4; }
-.sortbar [data-sort="go"] { grid-column: 5; }
-.sortbar [data-sort="rev"] { grid-column: 6; }
-.sortbar [data-sort="price"] { grid-column: 7; }
+.sortbar [data-sort="dist"] { grid-column: var(--col-dist); }
+.sortbar [data-sort="age"] { grid-column: var(--col-age); }
+.sortbar [data-sort="go"] { grid-column: var(--col-go); }
+.sortbar [data-sort="rev"] { grid-column: var(--col-rev); }
+.sortbar [data-sort="price"] { grid-column: var(--col-price); }
+#cpanel { display: none; gap: 4px; flex-wrap: wrap; align-items: center;
+  padding: 0 var(--pad) 8px; }
+#cpanel.on { display: flex; }
+#cpanel button {
+  min-height: 28px; padding: 0 8px; font-size: 12px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: transparent; color: var(--ink);
+}
+#cpanel button.on { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
+html[data-hide~="dist"] .sortbar [data-sort="dist"],
+html[data-hide~="dist"] main.compact .card .mdist,
+html[data-hide~="age"] .sortbar [data-sort="age"],
+html[data-hide~="age"] main.compact .card .mage,
+html[data-hide~="go"] .sortbar [data-sort="go"],
+html[data-hide~="go"] main.compact .card .mgo,
+html[data-hide~="rev"] .sortbar [data-sort="rev"],
+html[data-hide~="rev"] main.compact .card .mrev,
+html[data-hide~="price"] .sortbar [data-sort="price"] { display: none !important; }
+html[data-hide~="price"] main.compact .card::after { content: none; display: none; }
 main.compact .card {
   display: grid;
-  grid-template-columns: 36px minmax(0,1fr) 44px 36px 28px 40px 48px;
+  grid-template-columns: var(--mf-cols, 36px minmax(0,1fr) minmax(0,44px) minmax(0,36px) minmax(0,28px) minmax(0,40px) minmax(0,48px));
+  min-width: 0;
   align-items: center;
   padding: 10px var(--pad); margin-bottom: 0;
   column-gap: 6px; row-gap: 0;
@@ -3943,7 +3992,7 @@ main.compact .card {
   border-radius: 0; box-shadow: none; cursor: pointer;
   touch-action: pan-y;
   transition: background .18s var(--ease);
-  content-visibility: auto; contain-intrinsic-size: auto 44px;
+  content-visibility: auto; contain-intrinsic-size: auto 62px;
 }
 main.compact .card.want { background: var(--want); }
 main.compact .card.skip { background: var(--skip); }
@@ -4005,21 +4054,38 @@ main.compact .card .starbox .peak::after {
   font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: 0;
 }
 main.compact .card h3 {
-  display: flex; align-items: center; gap: 4px;
-  font: 500 15px/1.25 "Iowan Old Style", Palatino, "Songti SC", "STSong", "Noto Serif SC", Georgia, serif;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px;
+  font-size: 14px; font-weight: 500; line-height: 1.3;
   letter-spacing: .01em; min-width: 0; flex: 1; overflow: hidden;
 }
+main.compact .card:not(.open) h3 {
+  white-space: normal;
+}
 main.compact .card:not(.open) h3 .mfname {
-  display: block; min-width: 0; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap; flex: 1;
+  display: block; order: 1; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; flex: 1 1 0;
 }
 main.compact .card h3 a,
 main.compact .card .loc a { pointer-events: none; text-decoration: none; color: inherit; }
-main.compact .card:not(.open) h3 .zh { display: none; }
-main.compact .card.open h3 {
-  font-size: 16.5px; font-weight: 600; line-height: 1.3;
+main.compact .card:not(.open) h3 .mbest { order: 2; }
+main.compact .card:not(.open) h3 .booklast { order: 3; }
+main.compact .card:not(.open) h3 .zh {
+  display: block !important; order: 4; flex: 1 1 100%;
+  font-size: 12px; font-style: normal; font-weight: 400; line-height: 1.3;
+  color: var(--muted); margin-left: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-main.compact .card.open h3 .zh { font-size: 11px; font-weight: 500; flex: none; }
+main.compact .card.open h3 {
+  overflow: visible; white-space: normal;
+  font-size: 15px; font-weight: 600; line-height: 1.35;
+}
+main.compact .card.open h3 .mfname {
+  overflow: visible; white-space: normal; flex: 0 1 auto;
+}
+main.compact .card.open h3 .zh {
+  display: inline !important; flex: none;
+  font-size: 12px; font-weight: 400; color: var(--muted); margin-left: .15em;
+}
 .card header .mbest {
   flex: none; font-size: 10px; font-style: normal; font-weight: 650;
   color: var(--ink); letter-spacing: 0;
@@ -4040,10 +4106,10 @@ main.compact .card .mrev {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   font-variant-numeric: tabular-nums; text-align: right;
 }
-main.compact .card .mdist { grid-column: 3; text-overflow: clip; }
-main.compact .card .mage { grid-column: 4; }
-main.compact .card .mgo { grid-column: 5; }
-main.compact .card .mrev { grid-column: 6; }
+main.compact .card .mdist { grid-column: var(--col-dist); text-overflow: clip; }
+main.compact .card .mage { grid-column: var(--col-age); }
+main.compact .card .mgo { grid-column: var(--col-go); }
+main.compact .card .mrev { grid-column: var(--col-rev); }
 html[data-sort="dist"] main.compact .card .mdist,
 html[data-sort="age"] main.compact .card .mage,
 html[data-sort="go"] main.compact .card .mgo,
@@ -4051,7 +4117,7 @@ html[data-sort="rev"] main.compact .card .mrev {
   color: var(--live); font-weight: 650;
 }
 main.compact .card::after {
-  grid-column: 7; grid-row: 1; align-self: center;
+  grid-column: var(--col-price); grid-row: 1; align-self: center;
   content: attr(data-p);
   font-size: 11px; font-weight: 550; color: var(--muted);
   font-variant-numeric: tabular-nums; text-align: right;
@@ -4119,20 +4185,6 @@ main.compact .card.open .kv[data-k] > span {
 }
 main.compact .card.open .kv[data-k]::before { display: none; }
 main.compact .card.open nav { order: 9; margin-top: 8px; }
-html[data-star="want"] #sort.sortbar,
-html[data-star="want"] main.compact .card:not(.open) {
-  grid-template-columns: 36px minmax(0,1fr) 48px 56px;
-}
-html[data-star="want"] .sortbar [data-sort="age"],
-html[data-star="want"] .sortbar [data-sort="go"],
-html[data-star="want"] .sortbar [data-sort="rev"] { display: none; }
-html[data-star="want"] .sortbar [data-sort="dist"] { grid-column: 3; }
-html[data-star="want"] .sortbar [data-sort="price"] { grid-column: 4; }
-html[data-star="want"] main.compact .card:not(.open) .mdist { grid-column: 3; }
-html[data-star="want"] main.compact .card:not(.open)::after { grid-column: 4; }
-html[data-star="want"] main.compact .card:not(.open) .mage,
-html[data-star="want"] main.compact .card:not(.open) .mgo,
-html[data-star="want"] main.compact .card:not(.open) .mrev { display: none !important; }
 .mealh {
   flex: none; width: 100%; margin: 0; padding: 3px var(--pad) 1px;
   font-size: 11px; font-weight: 650; color: var(--muted); letter-spacing: .06em;
@@ -4141,6 +4193,42 @@ main:not(.compact) .mwhen,
 main.compact .card.open .mwhen { display: none !important; }
 `
   document.head.appendChild(css);
+
+  function applyCols() {
+    const vis = COLS.filter(c => shown.has(c[0]));
+    const root = document.documentElement;
+    root.style.setProperty("--mf-cols", ["36px", "minmax(0,1fr)"].concat(vis.map(c => "minmax(0," + c[1] + ")")).join(" "));
+    COLS.forEach(c => {
+      const i = vis.findIndex(v => v[0] === c[0]);
+      root.style.setProperty("--col-" + c[0], String(i < 0 ? 3 : i + 3));
+    });
+    root.setAttribute("data-hide", COLS.filter(c => !shown.has(c[0])).map(c => c[0]).join(" "));
+    if (cpanel) cpanel.querySelectorAll("[data-col]").forEach(b => b.classList.toggle("on", shown.has(b.dataset.col)));
+  }
+  applyCols();
+  function setColsOpen(on) {
+    if (cpanel) cpanel.classList.toggle("on", on);
+    ctog.classList.toggle("hot", on);
+  }
+  ctog.onclick = e => {
+    e.stopPropagation();
+    setColsOpen(!ctog.classList.contains("hot"));
+  };
+  if (cpanel) cpanel.addEventListener("click", e => {
+    const b = e.target.closest("[data-col]");
+    if (!b) return;
+    e.stopPropagation();
+    const id = b.dataset.col;
+    if (shown.has(id)) shown.delete(id);
+    else shown.add(id);
+    localStorage.setItem(CK, JSON.stringify(COLS.map(c => c[0]).filter(id => shown.has(id))));
+    applyCols();
+  });
+  document.addEventListener("click", e => {
+    if (!ctog.classList.contains("hot")) return;
+    if (e.target.closest("#ctog, #cpanel")) return;
+    setColsOpen(false);
+  });
 
   function setCompact(on) {
     mainEl.classList.toggle("compact", on);
@@ -4322,7 +4410,7 @@ main.compact .card.open .kv[data-k="book"] { order: 5; }
   height: 24px; padding: 0 8px; border: 1px solid var(--line); border-radius: var(--radius);
   background: transparent; font-size: 12px; font-weight: 550;
 }
-.bnone.on { background: var(--mic); color: #fff8f2; border-color: var(--mic); }
+.bnone.on { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 `;
   document.head.appendChild(css);
 
@@ -4861,7 +4949,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=153", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=161", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
