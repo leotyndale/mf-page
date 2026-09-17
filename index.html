@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="163">
+<html lang="zh-CN" data-city="paris" data-ver="164">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v163</title>
+<title>工作笔记 v164</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -904,17 +904,15 @@ body.maplock header.top { z-index: 2100; }
    app had (button:active { scale(.97) }), so tapping a city or star felt dead.
    Give them their own response instead of a transform. */
 .cities button:active, .boxes button:active, .tabs button:active,
-.sortbar button:active { color: var(--ink); background: var(--wash); }
+.sortbar button:active { color: var(--ink); background: none; }
 .tabs button { transition: color var(--t) var(--ease), background .12s var(--ease),
   border-color var(--t) var(--ease); }
 .cities button, .boxes button, .sortbar button {
   transition: color var(--t) var(--ease), background .12s var(--ease); }
-/* Undersized controls (32px toggles, 40px star tabs, 24px card triggers) get a
-   real 44px hit area via ::after without growing visually or reflowing the bar. */
-.ftog, .ccy, #vtog, .mtrig, .tabs button, .sortbar button, .chips button, .subs button {
+.ftog, .ccy, #vtog, #ctog, .mtrig, .chips button, .subs button {
   position: relative; touch-action: manipulation; }
-.ftog::after, .ccy::after, #vtog::after, .mtrig::after, .tabs button::after,
-.sortbar button::after, .chips button::after, .subs button::after {
+.ftog::after, .ccy::after, #vtog::after, #ctog::after, .mtrig::after,
+.chips button::after, .subs button::after {
   content: ""; position: absolute; left: 50%; top: 50%;
   width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
 .ver { flex: none; margin: 0 auto 0 0; font-size: 11px; font-weight: 650; color: var(--muted); letter-spacing: .04em; }
@@ -937,11 +935,11 @@ html[data-star="plan"] #sort { display: none; }
   display: flex; align-items: center; gap: 14px;
   padding: 2px var(--pad) 6px; margin: 0;
 }
-.sortbar button { border: 0; background: none; padding: 4px 0;
+.sortbar button { border: 0; background: none; padding: 6px 0;
   font-size: 11px; color: var(--muted); border-radius: 0; letter-spacing: .04em; }
 .sortbar button.on { color: var(--mic); font-weight: 650; background: none; border: 0; }
-.sortbar button.on[data-dir="asc"]::after { content: " ↑"; }
-.sortbar button.on[data-dir="desc"]::after { content: " ↓"; }
+.sortbar button.on[data-dir="asc"]::after { content: "↑"; margin-left: 1px; }
+.sortbar button.on[data-dir="desc"]::after { content: "↓"; margin-left: 1px; }
 .leaflet-marker-icon.pin, .leaflet-marker-icon.poi {
   background: none !important; border: 0 !important; box-shadow: none !important;
   border-radius: 0 !important; overflow: visible !important;
@@ -1154,7 +1152,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v163</b>
+      <b class="ver" id="mfver">v164</b>
     </div>
   </div>
 </header>
@@ -3956,7 +3954,9 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
 }
 .sortbar [data-sort="now"] { grid-column: 1 / 3; margin-right: 0; justify-self: start; }
 .sortbar [data-sort="dist"], .sortbar [data-sort="age"],
-.sortbar [data-sort="go"], .sortbar [data-sort="rev"], .sortbar [data-sort="price"] { text-align: right; min-width: 0; }
+.sortbar [data-sort="go"], .sortbar [data-sort="rev"], .sortbar [data-sort="price"] {
+  text-align: right; min-width: 0; justify-self: stretch;
+}
 .sortbar [data-sort="dist"] { grid-column: var(--col-dist); }
 .sortbar [data-sort="age"] { grid-column: var(--col-age); }
 .sortbar [data-sort="go"] { grid-column: var(--col-go); }
@@ -3995,9 +3995,8 @@ main.compact .card {
 }
 main.compact .card.want { background: var(--want); }
 main.compact .card.skip { background: var(--skip); }
-main.compact .card.press {
-  background-image: linear-gradient(var(--wash), var(--wash));
-}
+main.compact .card.press { background: var(--skip); }
+main.compact .card.press.want { background: var(--want); }
 main.compact .card.open {
   background: var(--card); border: 1px solid var(--line);
   border-radius: var(--radius); box-shadow: none;
@@ -4950,7 +4949,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=163", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=164", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
