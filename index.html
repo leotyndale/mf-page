@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="181">
+<html lang="zh-CN" data-city="paris" data-ver="182">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v181</title>
+<title>工作笔记 v182</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1121,7 +1121,8 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       <select id="fextra">
         <option value="">榜单不限</option>
         <option value="old">老字号</option>
-        <option value="dianping">点评</option>
+        <option value="pearl">黑珍珠</option>
+        <option value="bichi">必吃榜</option>
         <option value="best">50佳</option>
         <option value="steak">牛排咖啡</option>
         <option value="pizza">披萨</option>
@@ -1142,7 +1143,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v181</b>
+      <b class="ver" id="mfver">v182</b>
     </div>
   </div>
 </header>
@@ -1913,7 +1914,8 @@ const EXTRA = {
   burger: c => /Big 7[^·]*汉堡/.test(honorOf(c)),
   bar: c => /Big 7[^·]*(?:酒吧|鸡尾酒)/.test(honorOf(c)),
   vegan: c => /Big 7[^·]*素食/.test(honorOf(c)),
-  dianping: c => /必吃榜|黑珍珠/.test(honorOf(c)),
+  pearl: c => /黑珍珠/.test(honorOf(c)),
+  bichi: c => /必吃榜/.test(honorOf(c)),
   sweet: c => /茶室|烘焙|咖啡|甜品|巧克力|冰淇淋/.test(c.dataset.cuisine || ""),
 };
 function extraHit(c) {
@@ -2209,7 +2211,7 @@ function restoreUi(forCity, global) {
   const ui = loadUi();
   if (global) {
     let st = ui.star === "plate" ? "sel" : ui.star;
-    extraF = ui.extra || "";
+    extraF = ui.extra === "dianping" ? "pearl" : (ui.extra || "");
     if (EXTRA[st] || st === "see") {
       extraF = extraF || st;
       st = "other";
@@ -4963,7 +4965,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=181", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=182", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
