@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="185">
+<html lang="zh-CN" data-city="paris" data-ver="192">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v185</title>
+<title>工作笔记 v192</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1002,12 +1002,18 @@ html[data-star="plan"] #sort { display: none; }
   background-position: right 6px center; background-size: 12px;
 }
 #fpanel .hint { margin: -4px 0 10px; }
-.fbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0; flex: none;
-  margin: 0; padding: 6px 0 0;
+.fbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: none;
+  margin: 0; padding: 8px 0 0;
   border-top: 1px solid var(--line); background: var(--card); }
 #fpanel .fbar button { margin: 0; width: auto; height: 28px; padding: 0 8px;
   font-size: 12px; font-weight: 500; background: transparent; color: var(--muted);
   border: 0; border-radius: 0; }
+#fpanel .fbar #freset {
+  height: 36px; min-width: 64px; padding: 0 16px; font-size: 13px; font-weight: 650;
+  color: var(--mic); background: var(--onfill); border: 1px solid var(--mic);
+  border-radius: var(--radius); position: relative; touch-action: manipulation;
+}
+#fpanel .fbar #freset::after { content: ""; position: absolute; inset: -8px; }
 #mf-st { flex: 1 1 100%; font-size: 11px; color: var(--muted); padding: 2px 8px 0; }
 #mf-st:empty { display: none; }
 main.compact .card:not(.open) .kv,
@@ -1141,7 +1147,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v185</b>
+      <b class="ver" id="mfver">v192</b>
     </div>
   </div>
 </header>
@@ -1164,6 +1170,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
   <button type="button" data-sort="age">店龄</button>
   <button type="button" data-sort="go">值得</button>
   <button type="button" data-sort="rev">评论</button>
+  <button type="button" data-sort="bfast">早餐</button>
   <button type="button" data-sort="price">价格</button>
 </div>
 <div id="plan" class="hide"></div>
@@ -1771,7 +1778,7 @@ function revOf(c) {
 }
 function restoreSort(raw) {
   if (!sortEl) return;
-  const m = String(raw || "").match(/^(now|price|dist|age|go|rev|late)(?:-(asc|desc))?$/);
+  const m = String(raw || "").match(/^(now|price|dist|age|go|rev|late|bfast)(?:-(asc|desc))?$/);
   sortEl.querySelectorAll(":scope > button").forEach(b => {
     const on = !!(m && b.dataset.sort === m[1]);
     b.classList.toggle("on", on);
@@ -1974,9 +1981,38 @@ function priceKey(c) {
   const d = +c.dataset.price;
   return d > 0 ? d : Infinity;
 }
+function bfastKey(c) {
+  const n = +c.dataset.bf;
+  return n > 0 ? n : Infinity;
+}
 function stampPrice(c) {
   const n = priceKey(c);
   c.dataset.p = n === Infinity ? "" : moneyFmt(n, "eur");
+  const raw = kvOrig(c, "bfast");
+  const bf = firstEur(raw);
+  c.dataset.bf = bf === Infinity ? "" : String(bf);
+  const em = c.querySelector(":scope > header > em:not(.mwhen)");
+  if (!em) return;
+  let lunch = menuEur(kvOrig(c, "menu") || kvOrig(c, "price"));
+  if (lunch === Infinity) {
+    const d = +c.dataset.price;
+    lunch = d > 0 ? d : Infinity;
+  }
+  const cheap = bf !== Infinity && lunch !== Infinity && bf < lunch;
+  if (cheap) em.dataset.bp = moneyFmt(bf, "eur");
+  else em.removeAttribute("data-bp");
+  const buffet = /自助/.test(raw);
+  const noCarte = /无单点/.test(raw);
+  const carte = /可单点|另有单点|单点至|自助或单点|有自助\+单点|热早餐/.test(raw);
+  const set = /欧陆|美式|套餐|Continental|American|Parisien/.test(raw);
+  const kind = buffet && !noCarte && (carte || set) ? "全" : buffet ? "助" : (carte || set) ? "点" : "";
+  if (kind) em.dataset.bk = kind;
+  else em.removeAttribute("data-bk");
+  const bits = [];
+  if (kind) bits.push({ 助: "自助", 点: "单点", 全: "自助+单点" }[kind]);
+  if (cheap) bits.push(em.dataset.bp);
+  if (bits.length) em.dataset.bl = bits.join(" · ");
+  else em.removeAttribute("data-bl");
 }
 function paintCcy() {
   document.querySelectorAll("[data-morig]").forEach(b => {
@@ -2081,8 +2117,9 @@ function apply() {
       if (yb === Infinity) return -1;
       return (ya - yb) * dir || Number(a.dataset.i) - Number(b.dataset.i);
     }
-    if (field === "price") {
-      const pa = priceKey(a), pb = priceKey(b);
+    if (field === "price" || field === "bfast") {
+      const pa = field === "bfast" ? bfastKey(a) : priceKey(a);
+      const pb = field === "bfast" ? bfastKey(b) : priceKey(b);
       if (pa === Infinity && pb === Infinity) return Number(a.dataset.i) - Number(b.dataset.i);
       if (pa === Infinity) return 1;
       if (pb === Infinity) return -1;
@@ -3922,15 +3959,16 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
     ["age", "36px", "店龄"],
     ["go", "28px", "值得"],
     ["rev", "40px", "评论"],
+    ["bfast", "64px", "早餐"],
     ["price", "48px", "价格"],
   ];
-  const CK = "mf-cols2";
+  const CK = "mf-cols3";
   function loadCols() {
     try {
       const a = JSON.parse(localStorage.getItem(CK) || "null");
       if (Array.isArray(a)) return new Set(COLS.map(c => c[0]).filter(id => a.includes(id)));
     } catch {}
-    if (innerWidth < 480) return new Set(["dist", "price"]);
+    if (innerWidth < 480) return new Set(["dist", "bfast", "price"]);
     return new Set(COLS.map(c => c[0]));
   }
   let shown = loadCols();
@@ -3958,7 +3996,8 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
 }
 .sortbar [data-sort="now"] { grid-column: 1 / 3; margin-right: 0; justify-self: start; }
 .sortbar [data-sort="dist"], .sortbar [data-sort="late"], .sortbar [data-sort="age"],
-.sortbar [data-sort="go"], .sortbar [data-sort="rev"], .sortbar [data-sort="price"] {
+.sortbar [data-sort="go"], .sortbar [data-sort="rev"], .sortbar [data-sort="bfast"],
+.sortbar [data-sort="price"] {
   text-align: right; min-width: 0; justify-self: stretch;
 }
 .sortbar [data-sort="dist"] { grid-column: var(--col-dist); }
@@ -3966,6 +4005,7 @@ if (typeof module !== "undefined") module.exports = MFPLAN;
 .sortbar [data-sort="age"] { grid-column: var(--col-age); }
 .sortbar [data-sort="go"] { grid-column: var(--col-go); }
 .sortbar [data-sort="rev"] { grid-column: var(--col-rev); }
+.sortbar [data-sort="bfast"] { grid-column: var(--col-bfast); }
 .sortbar [data-sort="price"] { grid-column: var(--col-price); }
 #cpanel { display: none; gap: 4px; flex-wrap: wrap; align-items: center;
   padding: 0 var(--pad) 8px; }
@@ -3986,6 +4026,8 @@ html[data-hide~="go"] .sortbar [data-sort="go"],
 html[data-hide~="go"] main.compact .card .mgo,
 html[data-hide~="rev"] .sortbar [data-sort="rev"],
 html[data-hide~="rev"] main.compact .card .mrev,
+html[data-hide~="bfast"] .sortbar [data-sort="bfast"],
+html[data-hide~="bfast"] main.compact .card .mbf,
 html[data-hide~="price"] .sortbar [data-sort="price"] { display: none !important; }
 html[data-hide~="price"] main.compact .card::after { content: none; display: none; }
 html[data-hide~="map"] .mapwrap { display: none !important; }
@@ -4021,19 +4063,13 @@ main.compact .card header {
 main.compact .card .starbox { flex: none; font-size: 10px; line-height: 1.2; }
 main.compact .card .starbox .peak,
 main.compact .card em { display: none; }
-main.compact .card:not(.open) header > em {
+main.compact .card:not(.open) header > em.mwhen {
   display: inline-flex !important; align-items: center; justify-content: center;
   flex: none; width: 18px; height: 16px; overflow: hidden;
-  border-radius: var(--radius); background: var(--want); font-size: 0;
-}
-main.compact .card:not(.open) header > em:not(.mwhen)::before {
-  content: "早"; font-size: 10px; font-weight: 650; font-style: normal; color: var(--gold);
-}
-main.compact .card:not(.open) header > em.mwhen {
+  border-radius: var(--radius); background: var(--want);
   font-size: 10px; font-weight: 650; font-style: normal; color: var(--gold);
 }
-main.compact .card:not(.open) header > em:not(.open):not(.mwhen) { background: var(--skip); }
-main.compact .card:not(.open) header > em:not(.open):not(.mwhen)::before { color: var(--muted); }
+.card header > em[data-bl]::after { content: " · " attr(data-bl); font-variant-numeric: tabular-nums; }
 main.compact .card .starbox .now { font-size: 0; }
 main.compact .card .starbox .now::after {
   font-size: 11px; font-weight: 700; color: var(--mic); letter-spacing: 0;
@@ -4102,7 +4138,8 @@ main.compact .card .mdist,
 main.compact .card .mlate,
 main.compact .card .mage,
 main.compact .card .mgo,
-main.compact .card .mrev {
+main.compact .card .mrev,
+main.compact .card .mbf {
   display: block !important; grid-row: 1; margin: 0;
   font-size: 11px; font-style: normal; font-weight: 550; color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -4114,10 +4151,12 @@ main.compact .card .mlate.late { color: var(--gold); }
 main.compact .card .mage { grid-column: var(--col-age); }
 main.compact .card .mgo { grid-column: var(--col-go); }
 main.compact .card .mrev { grid-column: var(--col-rev); }
+main.compact .card .mbf { grid-column: var(--col-bfast); }
 html[data-sort="dist"] main.compact .card .mdist,
 html[data-sort="age"] main.compact .card .mage,
 html[data-sort="go"] main.compact .card .mgo,
 html[data-sort="rev"] main.compact .card .mrev,
+html[data-sort="bfast"] main.compact .card .mbf,
 html[data-sort="late"] main.compact .card .mlate:not(.late) {
   color: var(--live); font-weight: 650;
 }
@@ -4154,7 +4193,8 @@ main.compact .card.open .mdist,
 main.compact .card.open .mlate,
 main.compact .card.open .mage,
 main.compact .card.open .mgo,
-main.compact .card.open .mrev { cursor: pointer; }
+main.compact .card.open .mrev,
+main.compact .card.open .mbf { cursor: pointer; }
 main.compact .card.open > * { min-width: 0; }
 main.compact .card.open header { order: 1; }
 main.compact .card.open .loc { order: 2; }
@@ -4323,6 +4363,9 @@ main.compact .card.open .mwhen { display: none !important; }
       const rev = typeof revOf === "function" ? revOf(c) : 0;
       meta(c, "mrev", rev ? String(rev) : "—");
       if (!c.querySelector(":scope > .mdist")) meta(c, "mdist", "—");
+      const em = c.querySelector(":scope > header > em:not(.mwhen)");
+      const bp = em && c.dataset.bf && typeof moneyFmt === "function" ? moneyFmt(+c.dataset.bf, "eur") : "";
+      meta(c, "mbf", em ? "早" + (em.dataset.bk || "") + bp : "—");
       wrapName(c.querySelector(":scope > header h3"));
       stampBest(c);
     });
@@ -4333,7 +4376,6 @@ main.compact .card.open .mwhen { display: none !important; }
     window.apply = function () {
       _apply();
       stampMeta();
-      window.apply = _apply;
     };
   }
 
@@ -4819,7 +4861,7 @@ main.compact .card.see:not(.open) .kv[data-k="bio"] > b {
 .mwhy { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
 .mwhy .msum { margin: 0 0 6px; font-size: 13px; font-weight: 650; }
 .mwhy .msum em { font-style: normal; color: var(--ink); }
-.mwhy .mline { display: grid; grid-template-columns: 2.2em 22px minmax(0,1fr); gap: 4px 6px; align-items: baseline;
+.mwhy .mline { display: grid; grid-template-columns: 2.2em 28px minmax(0,1fr); gap: 4px 6px; align-items: baseline;
   margin: 4px 0 0; font-size: 11px; line-height: 1.35; color: var(--muted); }
 .mwhy .mline b { font-weight: 650; color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
 .mwhy .mline span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -4831,120 +4873,212 @@ main.compact .card.open .mwhy:not(.on) .mline { display: none; }
 main.compact .card .mwhy em { display: inline; font-style: normal; }`;
   document.head.appendChild(css);
 
-  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const YEAR = 2026;
+  const STAR = { "3": 100, "2": 70, "1": 46, bib: 30, sel: 18, plate: 14, old: 38, sweet: 34, eat: 30, "0": 6 };
+  const HALL = [
+    [/当代厨艺殿堂/, 92, "当代殿堂"],
+    [/经典厨艺殿堂/, 86, "经典殿堂"],
+    [/历史殿堂/, 82, "历史殿堂"],
+    [/文化殿堂/, 78, "文化殿堂"],
+    [/接近殿堂/, 72, "接近殿堂"],
+  ];
+  const DRILL = { 一: 1, 二: 2, 三: 3 };
+  const MEM = new WeakMap();
   const kv = (c, k) => {
     const b = c.querySelector('.kv[data-k="' + k + '"] > b');
     return (b && b.textContent) || "";
   };
-  const STAR = { "3": 92, "2": 72, "1": 52, bib: 38, sel: 26, old: 44, sweet: 40, eat: 36, plate: 20, "0": 12 };
-  const FAIR = { "3": 280, "2": 140, "1": 80, bib: 40, sel: 55, old: 42, sweet: 16, eat: 32, plate: 50, "0": 70 };
+  const menuTxt = c => (typeof kvOrig === "function" ? kvOrig(c, "menu") || kvOrig(c, "price") : kv(c, "menu") || kv(c, "price"));
+  const recency = y => y >= 2024 ? 1 : y >= 2020 ? 0.75 : y >= 2015 ? 0.5 : 0.3;
 
-  function bestRank(h, kind) {
-    const block = h.match(new RegExp("世界" + kind + "佳(?!牛排|咖啡)([^·]*)"));
-    if (!block) return 999;
-    let n = 999, m, re = /第(\d+)/g;
-    while ((m = re.exec(block[1]))) n = Math.min(n, +m[1]);
-    return n;
+  function pairs(block) {
+    const out = [];
+    if (!block) return out;
+    const re = /(\d{4})\s*第(\d+)/g;
+    let m;
+    while ((m = re.exec(block))) out.push([+m[1], +m[2]]);
+    if (!out.length) {
+      const n = block.match(/第(\d+)/);
+      if (n) out.push([2024, +n[1]]);
+    }
+    return out;
   }
-  function best50(h) {
-    const n = bestRank(h, "50"), n2 = bestRank(h, "100");
-    if (n <= 10) return [100, "50佳第" + n];
-    if (n <= 25) return [86, "50佳第" + n];
-    if (n <= 50) return [72, "50佳第" + n];
-    if (n2 <= 80) return [56, "100佳第" + n2];
-    if (/La Liste[^·]*第\s*1/.test(h)) return [98, "La Liste 世界第一"];
-    if (/黑珍珠[^·]*三钻/.test(h)) return [88, "黑珍珠三钻"];
-    if (/黑珍珠[^·]*二钻/.test(h)) return [72, "黑珍珠二钻"];
-    if (/必吃榜/.test(h)) return [52, "必吃榜"];
-    return [0, ""];
+  function block(h, label) {
+    const m = h.match(new RegExp(label + "([^·]*)"));
+    return m ? m[1] : "";
   }
-  function gm(h) {
-    const m = h.match(/Gault&(?:amp;)?Millau\s*(\d)帽\s*([\d.]+)分/);
-    if (!m) return [0, ""];
-    return [clamp(+m[1] * 14 + (+m[2] - 12) * 4, 20, 100), m[1] + "帽" + m[2]];
+  function listPts(ps, top) {
+    let s = 0, best = 0, by = 0;
+    ps.forEach(([y, n]) => {
+      if (!best || n < best || (n === best && y > by)) { best = n; by = y; }
+      s += Math.max(0, top + 1 - n) * recency(y);
+    });
+    return { s, best, n: ps.length, y: by };
+  }
+  function lunchEur(c) {
+    if (typeof menuEur === "function") {
+      const n = menuEur(menuTxt(c));
+      if (n !== Infinity) return n;
+    }
+    const d = +c.dataset.price;
+    if (!(d > 0)) return 0;
+    const pane = (c.closest(".citypane") || {}).id || "";
+    return pane.indexOf("zurich") >= 0 ? d * 8.3 / 7.8 : d;
+  }
+  function pct(raws) {
+    const n = raws.length;
+    const order = raws.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+    const out = new Array(n);
+    for (let i = 0; i < n;) {
+      let j = i;
+      while (j + 1 < n && order[j + 1][0] === order[i][0]) j++;
+      const p = n === 1 ? 100 : Math.round(100 * (1 - (i + j) / 2 / (n - 1)));
+      for (let k = i; k <= j; k++) out[order[k][1]] = p;
+      i = j + 1;
+    }
+    return out;
   }
 
-  function score(c) {
+  function feat(c) {
     const now = c.dataset.now || "0";
     const peak = c.dataset.peak || now;
     const years = +c.dataset.years || 0;
     const born = +c.dataset.born || 0;
-    const age = born ? 2026 - born : 0;
+    const age = born ? YEAR - born : 0;
     const honor = kv(c, "honor") || "";
     const bio = kv(c, "bio") || "";
+    const rec = kv(c, "rec") || "";
     const loc = ((c.querySelector(".loc") || {}).textContent || "") + (c.dataset.arr || "");
-    const eur = +c.dataset.price || 0;
+    const cui = c.dataset.cuisine || "";
     const txt = honor + bio;
+    const eur = lunchEur(c);
+    const bargain = /性价比/.test(txt);
 
-    let resume = STAR[now] || 18;
-    if (peak && peak !== now && +peak > +now) resume = clamp(resume + 10, 0, 100);
-    if (years >= 20) resume = clamp(resume + 10, 0, 100);
-    else if (years >= 10) resume = clamp(resume + 6, 0, 100);
-    const rWhy = (now === "old" ? "老字号" : now === "eat" ? "必吃榜" : now === "sweet" ? (c.dataset.cuisine || "咖啡烘焙") : now === "3" ? "现三星" : now === "2" ? "现二星" : now === "1" ? "现一星"
-      : now === "bib" ? "必比登" : now === "sel" ? "精选" : now === "0" ? "已下榜" : "现级")
+    let resume = STAR[now] || 10;
+    resume += Math.min(years, 40) * 0.7;
+    if (peak && peak !== now && +peak > +now) resume += 8;
+    const rWhy = (now === "old" ? "老字号" : now === "eat" ? "必吃榜店" : now === "sweet" ? (cui || "甜品") : now === "3" ? "现三星" : now === "2" ? "现二星" : now === "1" ? "现一星"
+      : now === "bib" ? "必比登" : now === "sel" ? "精选" : now === "plate" ? "餐盘" : now === "0" ? "已下榜" : "现级")
       + (years ? " · 持星" + years + "年" : "")
-      + (peak && peak !== now ? " · 最高" + peak + "★" : "");
+      + (peak && peak !== now && +peak > +now ? " · 最高" + peak + "★" : "");
 
-    const [b50, b50w] = best50(honor);
-    const [gmv, gmw] = gm(honor);
-    let fame = 22;
-    if (/当代厨艺殿堂/.test(txt)) fame = 93;
-    else if (/经典厨艺殿堂/.test(txt)) fame = 88;
-    else if (/历史殿堂/.test(txt)) fame = 84;
-    else if (/文化殿堂/.test(txt)) fame = 80;
-    else if (/接近殿堂/.test(txt)) fame = 76;
-    else if (/尚未入殿堂|正在路上/.test(txt)) fame = 48;
-    if (/全球最有名/.test(txt)) fame = Math.max(fame, 90);
-    if (/Relais Desserts|世界最佳甜品|MOF/.test(txt)) fame = Math.max(fame, 80);
-    if (/最老|御用|御厨/.test(txt)) fame = Math.max(fame, 76);
-    if (/圈内极高/.test(txt)) fame = clamp(fame + 8, 0, 100);
-    else if (/圈内高/.test(txt)) fame = clamp(fame + 5, 0, 100);
-    fame = Math.max(fame, b50, gmv * 0.9);
-    const fWhy = [b50w, gmw, /殿堂/.test(txt) ? (txt.match(/[^；;·]*殿堂[^；;·]*/) || ["殿堂"])[0].trim() : "",
-      /圈内极高|全球最有名/.test(txt) ? "名声极高" : /圈内高/.test(txt) ? "圈内高" : ""]
-      .filter(Boolean).slice(0, 2).join(" · ") || "榜单记录有限";
+    const whyF = [];
+    let fame = 8;
+    HALL.forEach(x => { if (x[0].test(txt)) { fame = Math.max(fame, x[1]); whyF.push(x[2]); } });
+    if (/全球最有名/.test(txt)) { fame = Math.max(fame, 90); whyF.push("全球最有名"); }
+    if (/圈内极高/.test(txt)) fame += 8;
+    else if (/圈内高/.test(txt)) fame += 5;
+    const p50 = listPts(pairs(block(honor, "世界50佳(?!牛排|咖啡|披萨|汉堡)")), 50);
+    if (p50.n) { fame += p50.s * 1.1; whyF.push("50佳" + (p50.y || "") + "第" + p50.best + (p50.n > 1 ? " ·" + p50.n + "年" : "")); }
+    const p100 = listPts(pairs(block(honor, "世界100佳(?!牛排|咖啡|披萨|汉堡)")), 100);
+    if (p100.n) { fame += p100.s * 0.45; if (!p50.n) whyF.push("100佳第" + p100.best); }
+    const p120 = listPts(pairs(block(honor, "世界120佳")), 120);
+    if (p120.n) fame += p120.s * 0.25;
+    const liste = honor.match(/La Liste[^·]*第\s*(\d+)/);
+    if (liste) { fame += Math.max(0, 55 - +liste[1]) * (liste[1] === "1" ? 2.2 : 1); whyF.push("La Liste第" + liste[1]); }
+    let pearlMax = 0, pearlN = 0, pearlY = 0;
+    honor.replace(/(\d{4})([一二三])钻/g, (_, y, d) => {
+      const v = DRILL[d] || 0;
+      pearlN++;
+      if (v > pearlMax || (v === pearlMax && +y > pearlY)) { pearlMax = v; pearlY = +y; }
+    });
+    if (pearlMax) {
+      fame += [0, 14, 26, 40][pearlMax] * recency(pearlY) + pearlN * 3;
+      whyF.push("珠" + pearlMax + "钻" + (pearlY ? pearlY : ""));
+    }
+    const gm = honor.match(/Gault&(?:amp;)?Millau\s*(\d)帽\s*([\d.]+)分/);
+    if (gm) { fame += +gm[1] * 11 + (+gm[2] - 10) * 2.2; whyF.push(gm[1] + "帽" + gm[2]); }
+    if (/必吃榜/.test(honor)) { fame += 18; whyF.push("必吃榜"); }
+    const steak = listPts(pairs(block(honor, "世界100佳牛排")), 100);
+    if (steak.n) { fame += steak.s * 0.5; whyF.push("牛排榜第" + steak.best); }
+    const coffee = listPts(pairs(block(honor, "世界100佳咖啡")), 100);
+    if (coffee.n) { fame += coffee.s * 0.5; whyF.push("咖啡榜第" + coffee.best); }
+    (honor.match(/Big 7[^·]+/g) || []).forEach(t => {
+      const ps = pairs(t);
+      if (/7佳/.test(t)) { fame += 12; whyF.push(t.replace(/Big 7/, "").trim().slice(0, 10)); }
+      else if (ps.length) fame += listPts(ps, 50).s * 0.4;
+    });
+    const rm = kv(c, "rate").match(/谷歌\s*([\d.]+)\s*·\s*([\d,]+)评/);
+    if (rm) fame += Math.max(0, (+rm[1] - 3.6) * 16 + Math.log10(+rm[2].replace(/,/g, "") + 1) * 5);
+    if (/Relais Desserts|世界最佳甜品|MOF/.test(txt)) fame += 12;
+    const fWhy = whyF.filter(Boolean).slice(0, 2).join(" · ") || "榜单有限";
 
-    let hist = age >= 200 ? 96 : age >= 100 ? 86 : age >= 75 ? 74 : age >= 40 ? 58 : age >= 15 ? 40 : born ? 24 : (years >= 15 ? 50 : 22);
-    if (/历史殿堂|文化殿堂/.test(txt)) hist = clamp(hist + 8, 0, 100);
-    const hWhy = born ? "开业" + born + " · " + age + "年" : (years ? "持星史 " + years + "年" : "店龄未录");
+    let hist = age >= 200 ? 96 : age >= 100 ? 84 : age >= 75 ? 72 : age >= 40 ? 54 : age >= 15 ? 36 : born ? 22 : (years >= 15 ? 46 : 16);
+    if (/历史殿堂|文化殿堂/.test(txt)) hist += 10;
+    const hWhy = born ? "开业" + born + " · " + age + "年" : (years ? "持星" + years + "年" : "店龄未录");
 
-    const fair = FAIR[now] || 70;
-    let value = eur ? clamp(Math.round(fair / eur * 62), 14, 96) : 40;
-    if (/性价比/.test(txt)) value = clamp(value + 12, 0, 100);
-    const vWhy = eur ? (eur <= fair * 0.7 ? "午饭相对便宜" : eur >= fair * 1.4 ? "偏贵" : "价位正常") + " · €" + eur : "价格未录";
-
-    let cul = 24;
-    if (age >= 150) cul += 30;
-    else if (age >= 80) cul += 18;
+    let cul = 16;
+    if (age >= 150) cul += 28;
+    else if (age >= 80) cul += 16;
     else if (age >= 40) cul += 8;
-    if (now === "old") cul += 16;
+    if (now === "old") cul += 14;
     if (/地标|景观|开屋顶|猎庄|宫殿|行会/.test(txt + loc)) cul += 12;
-    if (/蔬菜|寿司|法日|里昂小馆|茶室|烘焙|咖啡|巧克力|冰淇淋|分享餐/.test((c.dataset.cuisine || "") + txt)) cul += 8;
-    if (b50 >= 70) cul = clamp(cul + 14, 0, 100);
-    cul = clamp(cul, 0, 100);
-    const cWhy = [age >= 80 ? "活历史" : "", /地标|景观|开屋顶/.test(txt + loc) ? "地标场景" : "",
-      c.dataset.cuisine || ""].filter(Boolean).slice(0, 2).join(" · ") || "常规体验";
+    if (/蔬菜|寿司|法日|里昂小馆|茶室|烘焙|咖啡|巧克力|冰淇淋|分享餐/.test(cui + txt)) cul += 8;
+    if (rec) cul += 6;
+    if (c.dataset.carte === "yes") cul += 3;
+    if (p50.best && p50.best <= 25) cul += 10;
+    const cWhy = [age >= 80 ? "活历史" : "", /地标|景观|开屋顶/.test(txt + loc) ? "地标场景" : "", cui].filter(Boolean).slice(0, 2).join(" · ") || "常规体验";
 
-    const rows = [
-      ["履历", resume, rWhy],
-      ["名声", fame, fWhy],
-      ["历史", hist, hWhy],
-      ["价格", value, vWhy],
-      ["文化", cul, cWhy],
-    ];
-    const total = Math.round(resume * 0.25 + fame * 0.27 + hist * 0.16 + value * 0.18 + cul * 0.14);
-    const verdict = total >= 86 ? "必去" : total >= 74 ? "很值得" : total >= 60 ? "值得" : total >= 46 ? "看情况" : "可过";
-    const weak = rows.slice().sort((a, b) => a[1] - b[1])[0];
-    const strong = rows.slice().sort((a, b) => b[1] - a[1])[0];
-    const blurb = strong[1] >= 80 ? strong[0] + "突出" : weak[1] <= 40 ? weak[0] + "拉分" : "综合均衡";
-    c.dataset.go = String(total);
-    return { total, verdict, blurb, rows };
+    return { resume, fame, hist, cul, eur, now, bargain, rWhy, fWhy, hWhy, cWhy };
+  }
+
+  function scoreAll() {
+    const cards = [...document.querySelectorAll(".citypane .card")];
+    if (!cards.length) return;
+    const fs = cards.map(feat);
+    const med = {};
+    fs.forEach(f => {
+      if (!f.eur) return;
+      (med[f.now] || (med[f.now] = [])).push(f.eur);
+    });
+    Object.keys(med).forEach(k => {
+      const a = med[k].slice().sort((x, y) => x - y);
+      med[k] = a[Math.floor(a.length / 2)] || 1;
+    });
+    fs.forEach(f => {
+      const fair = med[f.now] || 1;
+      f.valueRaw = f.eur ? fair / f.eur : 1;
+      if (f.bargain) f.valueRaw *= 1.12;
+    });
+    const resumeP = pct(fs.map(f => f.resume));
+    const fameP = pct(fs.map(f => f.fame));
+    const histP = pct(fs.map(f => f.hist));
+    const culP = pct(fs.map(f => f.cul));
+    const valueP = new Array(fs.length);
+    const vGroup = {};
+    fs.forEach((f, i) => { (vGroup[f.now] || (vGroup[f.now] = [])).push(i); });
+    Object.keys(vGroup).forEach(g => {
+      const idx = vGroup[g];
+      const p = pct(idx.map(i => fs[i].valueRaw));
+      idx.forEach((i, j) => { valueP[i] = p[j]; });
+    });
+    cards.forEach((c, i) => {
+      const f = fs[i];
+      const vWhy = f.eur
+        ? ((f.valueRaw >= 1.25 ? "同星偏便宜" : f.valueRaw <= 0.75 ? "同星偏贵" : "同星中位") + " · €" + Math.round(f.eur))
+        : "价格未录";
+      const rows = [
+        ["履历", resumeP[i], f.rWhy],
+        ["名声", fameP[i], f.fWhy],
+        ["历史", histP[i], f.hWhy],
+        ["价格", valueP[i], vWhy],
+        ["文化", culP[i], f.cWhy],
+      ];
+      const total = Math.round(resumeP[i] * 0.26 + fameP[i] * 0.28 + histP[i] * 0.16 + valueP[i] * 0.14 + culP[i] * 0.16);
+      const verdict = total >= 86 ? "必去" : total >= 74 ? "很值得" : total >= 60 ? "值得" : total >= 46 ? "看情况" : "可过";
+      const weak = rows.slice().sort((a, b) => a[1] - b[1])[0];
+      const strong = rows.slice().sort((a, b) => b[1] - a[1])[0];
+      const blurb = strong[1] >= 88 ? strong[0] + "突出" : weak[1] <= 28 ? weak[0] + "拉分" : "综合均衡";
+      c.dataset.go = String(total);
+      MEM.set(c, { total, verdict, blurb, rows });
+    });
   }
 
   function paint(c) {
     if (c.dataset.scored) return;
     c.dataset.scored = "1";
-    const r = score(c);
+    const r = MEM.get(c);
+    if (!r) return;
     let box = c.querySelector(":scope > .mwhy");
     if (!box) {
       box = document.createElement("div");
@@ -4958,14 +5092,14 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
   }
 
   window.mfEnrich = paint;
-  document.querySelectorAll(".card").forEach(score);
+  scoreAll();
   if (typeof window.apply === "function") window.apply();
 })();
 
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=185", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=192", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
