@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="183">
+<html lang="zh-CN" data-city="paris" data-ver="184">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v183</title>
+<title>工作笔记 v184</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -1126,12 +1126,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
         <option value="best">50佳</option>
         <option value="steak">牛排</option>
         <option value="coffee">咖啡</option>
-        <option value="pizza">披萨</option>
-        <option value="burger">汉堡</option>
-        <option value="bar">酒吧</option>
-        <option value="cocktail">鸡尾酒</option>
-        <option value="vegan">素食</option>
-        <option value="ice">冰淇淋</option>
+        <option value="big7">披萨汉堡</option>
         <option value="candy">糖果礼品</option>
         <option value="sweet">茶室烘焙</option>
       </select>
@@ -1147,7 +1142,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v183</b>
+      <b class="ver" id="mfver">v184</b>
     </div>
   </div>
 </header>
@@ -1914,13 +1909,10 @@ const EXTRA = {
   old: c => c.dataset.now === "old" || (+c.dataset.born > 0 && +c.dataset.born <= 1950),
   best: c => /世界(?:50|100|120)佳(?!牛排|咖啡|披萨|汉堡|鸡尾酒|酒吧|冰淇淋|素食)/.test(honorOf(c)),
   steak: c => /世界100佳牛排|Big 7[^·]*牛排/.test(honorOf(c)),
-  coffee: c => (c.dataset.cuisine || "") === "咖啡" || /世界100佳咖啡|Big 7[^·]*咖啡/.test(honorOf(c)),
-  pizza: c => /Big 7[^·]*披萨/.test(honorOf(c)),
-  burger: c => /Big 7[^·]*汉堡/.test(honorOf(c)),
-  bar: c => /Big 7[^·]*酒吧/.test(honorOf(c)) || (c.dataset.cuisine || "") === "酒吧",
-  cocktail: c => /Big 7[^·]*鸡尾酒/.test(honorOf(c)) || (c.dataset.cuisine || "") === "鸡尾酒",
-  vegan: c => /Big 7[^·]*素食/.test(honorOf(c)),
-  ice: c => (c.dataset.cuisine || "") === "冰淇淋" || /Big 7[^·]*冰淇淋/.test(honorOf(c)),
+  coffee: c => (c.dataset.cuisine || "") === "咖啡"
+    || /世界100佳咖啡|Big 7[^·]*咖啡|(?:世界|欧洲)50佳咖啡|(?:巴黎|里昂|苏黎世)7佳咖啡/.test(honorOf(c)),
+  big7: c => /Big 7[^·]*(?:披萨|汉堡|酒吧|鸡尾酒|冰淇淋|素食)/.test(honorOf(c))
+    || /披萨|汉堡|酒吧|鸡尾酒|冰淇淋/.test(c.dataset.cuisine || ""),
   candy: c => /巧克力|糖果/.test(c.dataset.cuisine || "") || /糖果店/.test(honorOf(c)),
   pearl: c => /黑珍珠/.test(honorOf(c)),
   bichi: c => /必吃榜/.test(honorOf(c)),
@@ -2219,7 +2211,9 @@ function restoreUi(forCity, global) {
   const ui = loadUi();
   if (global) {
     let st = ui.star === "plate" ? "sel" : ui.star;
-    extraF = ui.extra === "dianping" ? "pearl" : (ui.extra || "");
+    extraF = ui.extra === "dianping" ? "pearl"
+      : /^(pizza|burger|bar|cocktail|vegan|ice)$/.test(ui.extra || "") ? "big7"
+      : (ui.extra || "");
     if (EXTRA[st] || st === "see") {
       extraF = extraF || st;
       st = "other";
@@ -4973,7 +4967,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=183", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=184", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
