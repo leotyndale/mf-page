@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-city="paris" data-ver="192">
+<html lang="zh-CN" data-city="paris" data-ver="196">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,7 +11,7 @@
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>工作笔记 v192</title>
+<title>工作笔记 v196</title>
 <style>/* required styles */
 
 .leaflet-pane,
@@ -992,6 +992,8 @@ html[data-star="plan"] #sort { display: none; }
 #fpanel .chips button.on { background: var(--onfill); color: var(--mic); border-color: var(--mic); }
 #fpanel .chips button::after { content: none; }
 #fpanel #fdays { flex-wrap: nowrap; }
+#fpanel #fclock { flex-wrap: wrap; }
+#fpanel .fg:has(#fclock) .lbl { min-width: 4.5em; }
 #fpanel .tools {
   display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0 0 8px;
 }
@@ -1077,6 +1079,18 @@ main.compact .card:not(.open) h3 .zh { display: none; }
       </div>
     </div>
     <div class="fg">
+      <span class="lbl">营业时间</span>
+      <div class="chips" id="fclock">
+        <button type="button" data-clock="" class="on">不限</button>
+        <button type="button" data-clock="now">营业中</button>
+        <button type="button" data-clock="morn">早上</button>
+        <button type="button" data-clock="noon">中午</button>
+        <button type="button" data-clock="aft">下午</button>
+        <button type="button" data-clock="eve">晚上</button>
+        <button type="button" data-clock="late">夜宵</button>
+      </div>
+    </div>
+    <div class="fg">
       <span class="lbl">餐段</span>
       <div class="chips" id="fmeal">
         <button type="button" data-meal="" class="on">不限</button>
@@ -1147,7 +1161,7 @@ main.compact .card:not(.open) h3 .zh { display: none; }
     </div>
     <div class="fbar">
       <button type="button" id="freset">重置</button>
-      <b class="ver" id="mfver">v192</b>
+      <b class="ver" id="mfver">v196</b>
     </div>
   </div>
 </header>
@@ -1736,10 +1750,11 @@ const carteEl = document.querySelector("#fcarte");
 const extraEl = document.querySelector("#fextra");
 const dayBtns = document.querySelectorAll("#fdays button");
 const mealEl = document.querySelector("#fmeal");
+const clockEl = document.querySelector("#fclock");
 const hotelEl = document.querySelector("#fhotel");
 const countEl = document.querySelector(".count");
 let star = "all", buckets = new Set(["active", "lost"]), slotF = "", extraF = "";
-let dayF = "", mealF = "", hotelF = "";
+let dayF = "", mealF = "", hotelF = "", clockF = "";
 let ccy = "cny";
 const UK = "mf-ui";
 const FX = { eur: 7.8, chf: 8.3 };
@@ -1883,6 +1898,139 @@ function parseHours(text) {
   if (!dinner.size && /晚餐/.test(text) && lunch.size) lunch.forEach(d => dinner.add(d));
   return { lunch, dinner };
 }
+const CLOCK_DAY = /^(?:每天|每日|周末|周[一二三四五六日](?:\s*、\s*(?:周)?[一二三四五六日])+|(?:周)?[一二三四五六日]\s*(?:至|–|—|-)\s*(?:周)?[一二三四五六日]|[一二三四五六日]{2,}|周[一二三四五六日]|[一二三四五六日])/;
+function clockDays(token) {
+  if (token === "每天" || token === "每日") return ALL.slice();
+  if (token === "周末") return [6, 7];
+  const span = /^(?:周)?([一二三四五六日])\s*(?:至|–|—|-)\s*(?:周)?([一二三四五六日])$/.exec(token);
+  if (span) return spanDays(DAY[span[1]], DAY[span[2]]);
+  const chars = token.includes("、") ? token.split("、").map(p => p.replace(/周/g, "")) : [...token.replace(/周/g, "")];
+  const days = chars.map(ch => DAY[ch] || 0).filter(Boolean);
+  return days.length === chars.length ? days : null;
+}
+function peelClockDays(text) {
+  const matched = CLOCK_DAY.exec(text);
+  if (!matched) return { days: null, rest: text };
+  return { days: clockDays(matched[0]), rest: text.slice(matched[0].length).trim() };
+}
+function clockTimes(text) {
+  const out = [];
+  for (const m of text.matchAll(/(\d{1,2})[:：](\d{2})(?:\s*[–—-]\s*(\d{1,2})[:：](\d{2})|\s*起)/g)) {
+    const start = +m[1] * 60 + +m[2];
+    if (+m[1] > 23 || +m[2] > 59) continue;
+    if (m[3] == null) { out.push([start, start >= 16 * 60 ? 24 * 60 : start + 150]); continue; }
+    if (+m[3] > 23 || +m[4] > 59) continue;
+    let end = +m[3] * 60 + +m[4];
+    if (end <= start) end += 24 * 60;
+    out.push([start, end]);
+  }
+  return out;
+}
+function clockPieces(text) {
+  return text.split(/\s*(?:\/|，|；|·)\s*/).map(s => s.trim()).filter(Boolean);
+}
+function clockBlob(text, inherit) {
+  const slots = [];
+  let last = inherit;
+  clockPieces(text).forEach(raw => {
+    const piece = raw.replace(/（[^）]*）/g, "").trim().replace(/^(?:早餐|午餐|晚餐|仅)+/, "").trim();
+    const peeled = peelClockDays(piece);
+    if (peeled.days) last = peeled.days;
+    const times = clockTimes(peeled.days ? peeled.rest : piece);
+    if (!times.length || !last || !last.length) return;
+    times.forEach(([start, end]) => slots.push({ days: last, start, end }));
+  });
+  return slots;
+}
+function clockKind(clause) {
+  if (/午餐\s*\+\s*晚餐|午餐＋晚餐/.test(clause)) return "B";
+  const lunch = /午餐/.test(clause), dinner = /晚餐/.test(clause);
+  if (dinner && !lunch) return "D";
+  if (lunch && !dinner) return "L";
+  return "B";
+}
+function clockDaysFor(head, meal) {
+  const days = new Set();
+  head.split("；").forEach(clause => {
+    const kind = clockKind(clause);
+    if ((meal === "L" && kind === "D") || (meal === "D" && kind === "L")) return;
+    const text = clause.replace(/（[^）]*）/g, "")
+      .replace(/午餐\s*\+\s*晚餐|午餐＋晚餐|仅晚餐|仅午餐|兼午餐|兼晚餐|可外订|早餐|午餐|晚餐|仅/g, "").trim();
+    (peelClockDays(text).days || []).forEach(d => days.add(d));
+  });
+  return [...days];
+}
+function clockSlots(raw) {
+  if (!raw || /停业|已关闭|temporarily closed|permanently closed/i.test(raw)) return [];
+  const text = raw.replace(/<[^>]+>/g, "").replace(/[^；]*仅住客[^；]*/g, "").replace(/^；+|；+$/g, "").trim();
+  if (!text || !/\d{1,2}[:：]\d{2}/.test(text)) return [];
+  const dot = text.indexOf("·");
+  if (dot < 0) return text.split("；").flatMap(clause => clockBlob(clause, null));
+  const head = text.slice(0, dot).trim();
+  const body = text.slice(dot + 1).trim();
+  if (!/\d{1,2}[:：]\d{2}/.test(body)) return [];
+  const bare = !clockPieces(body).some(rawPiece => {
+    const t = rawPiece.replace(/（[^）]*）/g, "").replace(/^(?:早餐|午餐|晚餐|仅)+/, "").trim();
+    return peelClockDays(t).days;
+  });
+  if (!bare) return clockBlob(body, [...new Set(clockDaysFor(head, "L").concat(clockDaysFor(head, "D")))]);
+  const slots = [];
+  let labeled = null;
+  clockPieces(body).forEach(rawPiece => {
+    const piece = rawPiece.replace(/（[^）]*）/g, "").trim();
+    if (piece.startsWith("午餐")) labeled = "L";
+    else if (piece.startsWith("晚餐")) labeled = "D";
+    clockTimes(piece).forEach(([start, end]) => {
+      const days = clockDaysFor(head, labeled || (start >= 16 * 60 ? "D" : "L"));
+      if (days.length) slots.push({ days, start, end });
+    });
+  });
+  return slots;
+}
+function slotHits(slot, day, minutes) {
+  return slot.days.some(openDay => {
+    if (openDay === day && minutes >= slot.start && minutes < Math.min(slot.end, 1440)) return true;
+    const next = openDay === 7 ? 1 : openDay + 1;
+    return slot.end > 1440 && next === day && minutes < slot.end - 1440;
+  });
+}
+function openNow(text) {
+  const now = new Date();
+  const day = now.getDay() || 7;
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  return clockSlots(text).some(slot => slotHits(slot, day, minutes));
+}
+const CLOCK_SPAN = {
+  morn: [6 * 60, 10 * 60],
+  noon: [10 * 60, 14 * 60],
+  aft: [14 * 60, 17 * 60],
+  eve: [17 * 60, 21 * 60],
+  late: [21 * 60, 26 * 60],
+};
+function rangesOverlap(start, end, from, to) {
+  return start < to && from < end;
+}
+function slotOverlaps(slot, day, from, to) {
+  const end = Math.min(to, 1440);
+  const onDay = from < 1440 && slot.days.some(openDay => {
+    if (openDay === day && rangesOverlap(slot.start, Math.min(slot.end, 1440), from, end)) return true;
+    const next = openDay === 7 ? 1 : openDay + 1;
+    return slot.end > 1440 && next === day && rangesOverlap(0, slot.end - 1440, from, end);
+  });
+  if (onDay) return true;
+  if (to <= 1440) return false;
+  const nextDay = day === 7 ? 1 : day + 1;
+  return slotOverlaps(slot, nextDay, 0, to - 1440);
+}
+function clockHit(text) {
+  if (!clockF) return true;
+  if (clockF === "now") return openNow(text);
+  const span = CLOCK_SPAN[clockF];
+  if (!span) return true;
+  const slots = clockSlots(text);
+  const days = selDay() ? [selDay()] : ALL;
+  return days.some(day => slots.some(slot => slotOverlaps(slot, day, span[0], span[1])));
+}
 function selDay() {
   if (dayF === "today") { const d = new Date().getDay(); return d === 0 ? 7 : d; }
   return dayF ? +dayF : 0;
@@ -1893,6 +2041,7 @@ function hotelHit(c) {
   return c.dataset.chain === hotelF;
 }
 function hoursHit(c) {
+  if (clockF && !clockHit(hoursText(c))) return false;
   if (mealF === "breakfast") return c.dataset.bf === "open" || c.dataset.bf === "guest";
   if (mealF === "breakfast-open") return c.dataset.bf === "open";
   if (mealF === "tea") return c.dataset.tea === "yes";
@@ -2196,10 +2345,10 @@ function apply() {
     h.textContent = n ? lab + " " + n : lab;
   });
   countEl.textContent = (boxed() ? shown + " 家" : shown + " / " + total + " 家")
-    + ((dayF || mealF) && !shown ? " · 无匹配或暂无时段" : "");
+    + ((dayF || mealF || clockF) && !shown ? " · 无匹配或暂无时段" : "");
   const tog = document.querySelector("#ftog");
   if (tog) tog.classList.toggle("hot", (star === "want" && !!slotF) || !statDef()
-    || !!(dayF || mealF || arr || cui || carte || hotelF || extraF || t)
+    || !!(dayF || mealF || clockF || arr || cui || carte || hotelF || extraF || t)
     || (window.mfLunchOn && mfLunchOn()));
   saveUi();
   renderMap();
@@ -2220,7 +2369,7 @@ function saveUi() {
   const per = Object.assign({}, prev.per || {});
   per[city] = { arr: arrEl ? arrEl.value : "", cui: cuiEl ? cuiEl.value : "" };
   const next = {
-    city, star, buckets: [...buckets], day: dayF, meal: mealF,
+    city, star, buckets: [...buckets], day: dayF, meal: mealF, clock: clockF,
     sort: sortKey(), carte: chipVal(carteEl, "carte"), q: q.value, ccy, slot: slotF,
     extra: extraF, hotel: hotelF,
     poi: { stay: !!poiOn.stay, ride: !!poiOn.ride, see: !!poiOn.see },
@@ -2258,6 +2407,7 @@ function restoreUi(forCity, global) {
     setChip(statEl, "stat", ["active", "lost", "closed"].filter(k => buckets.has(k)).join(","));
     dayF = ui.day || "";
     mealF = ui.meal || "";
+    clockF = ui.clock || "";
     hotelF = ui.hotel || "";
     pickOpt(hotelEl, hotelF);
     restoreSort(ui.sort);
@@ -2276,6 +2426,8 @@ function restoreUi(forCity, global) {
   starTabs.forEach(b => b.classList.toggle("on", b.dataset.star === star));
   dayBtns.forEach(b => b.classList.toggle("on", (b.dataset.day || "") === String(dayF)));
   setChip(mealEl, "meal", mealF);
+  setChip(clockEl, "clock", clockF);
+  armClock();
   syncSlot();
   syncBfHint();
   paintCcy();
@@ -2289,6 +2441,11 @@ function syncSlot() {
   if (slotW) slotW.classList.toggle("hide", star !== "want");
   const statW = document.getElementById("fstatw") || statEl;
   if (statW) statW.classList.toggle("hide", star === "plan");
+}
+let clockTimer = 0;
+function armClock() {
+  clearInterval(clockTimer);
+  clockTimer = clockF === "now" ? setInterval(apply, 60000) : 0;
 }
 function syncBfHint() {
   const el = document.getElementById("bfhint");
@@ -2414,6 +2571,7 @@ bindChips(statEl, "stat", v => {
   show();
 });
 bindChips(mealEl, "meal", v => { mealF = v; syncBfHint(); apply(); });
+bindChips(clockEl, "clock", v => { clockF = v; armClock(); apply(); });
 if (hotelEl) hotelEl.onchange = apply;
 if (arrEl) arrEl.onchange = apply;
 if (cuiEl) cuiEl.onchange = apply;
@@ -2421,7 +2579,7 @@ bindChips(carteEl, "carte", () => apply());
 if (extraEl) extraEl.onchange = () => { extraF = extraEl.value; mapTouched = false; show(); };
 const freset = document.querySelector("#freset");
 if (freset) freset.onclick = () => {
-  dayF = mealF = hotelF = slotF = "";
+  dayF = mealF = hotelF = slotF = clockF = "";
   buckets = new Set(["active", "lost"]);
   if (q) q.value = "";
   if (arrEl) arrEl.value = "";
@@ -2432,7 +2590,9 @@ if (freset) freset.onclick = () => {
   dayBtns.forEach(b => b.classList.toggle("on", !(b.dataset.day || "")));
   setChip(statEl, "stat", "active,lost");
   setChip(mealEl, "meal", "");
+  setChip(clockEl, "clock", "");
   setChip(carteEl, "carte", "");
+  armClock();
   setChip(slotEl, "slot", "");
   syncBfHint();
   apply();
@@ -5099,7 +5259,7 @@ main.compact .card .mwhy em { display: inline; font-style: normal; }`;
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("mf-sw.js?v=192", { updateViaCache: "none", scope: "./" });
+  navigator.serviceWorker.register("mf-sw.js?v=196", { updateViaCache: "none", scope: "./" });
   navigator.serviceWorker.addEventListener("message", e => {
     if (e.data && e.data.type === "mf-ver") location.reload();
   });
